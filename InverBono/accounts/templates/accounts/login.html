@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<main class="bg-neutral-900 flex flex-col justify-center items-center min-h-screen">
+  <div
+    class="bg-white rounded-xl py-12 px-8 border border-gray-500 shadow-[0_0_20px_0px_rgb(250_204_21)] max-w-sm w-full">
+    <h1 class="text-4xl font-bold">Iniciar sesión</h1>
+    <form method="POST" class="mt-5 flex flex-col gap-2">
+      {% csrf_token %}
+      <fieldset class="flex flex-col gap-1">
+        <label class="text-sm text-slate-500" for="email">Correo electrónico<sup
+            class="text-red-500">*</sup></label>
+        <input class="p-2 outline-yellow-600 border border-slate-400 rounded-md bg-gray-50" type="email"
+          name="email" id="email" placeholder="Correo" required autocomplete="email" value="{{ request.POST.email }}">
+      </fieldset>
+      <fieldset class="flex flex-col gap-1 mt-1">
+        <label class="text-sm text-slate-500" for="password">Contraseña<sup class="text-red-500">*</sup></label>
+        <input class="p-2 outline-yellow-600 border border-slate-400 rounded-md bg-gray-50" type="password"
+          name="password" id="password" placeholder="Contraseña" required autocomplete="current-password">
+      </fieldset>
+      <button
+        class="w-full py-2 bg-yellow-600 text-white font-semibold hover:bg-yellow-800 rounded-md mt-4 text-center"
+        type="submit">Ingresar</button>
+    </form>
+  </div>
+  <div class="text-center mt-6">
+    <p class="text-white font-light">¿No tienes una cuenta?</p>
+    <a href="/signup" class="font-medium text-yellow-300 hover:underline">Regístrate</a>
+  </div>
+
+  {% if error %}
+  <p class="mt-4 text-red-500 font-semibold">{{ error }}</p>
+  {% endif %}
+</main>
+{% endblock %}

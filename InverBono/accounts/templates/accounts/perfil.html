@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<main class="min-h-screen bg-gray-100 text-gray-900 flex items-center justify-center p-6">
+  <section class="w-full max-w-3xl bg-white border border-yellow-300 rounded-2xl shadow-xl p-8">
+
+    <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+      <!-- Avatar -->
+      <div class="flex-shrink-0 bg-yellow-500 rounded-full w-28 h-28 flex items-center justify-center text-3xl font-bold text-white shadow-inner">
+        {{ user.nombres|slice:":1" }}{{ user.apellidos|slice:":1" }}
+      </div>
+
+      <!-- User info -->
+      <div class="w-full">
+        <h1 class="text-3xl font-bold mb-1 text-gray-900">Hola, {{ user.nombres }}</h1>
+        <p class="text-sm text-gray-500 mb-4">Este es el resumen de tu perfil personal.</p>
+
+        <div class="grid md:grid-cols-2 gap-6 text-sm">
+          <div>
+            <p class="text-gray-500">Nombres</p>
+            <p class="font-medium text-gray-900">{{ user.nombres }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Apellidos</p>
+            <p class="font-medium text-gray-900">{{ user.apellidos }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Correo electrónico</p>
+            <p class="font-medium text-gray-900">{{ user.email }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Celular</p>
+            <p class="font-medium text-gray-900">{{ user.celular }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Tipo de documento</p>
+            <p class="font-medium text-gray-900">{{ user.tipo_documento }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">N° de documento</p>
+            <p class="font-medium text-gray-900">{{ user.documento }}</p>
+          </div>
+          <div class="md:col-span-2">
+            <p class="text-gray-500">Dirección</p>
+            <p class="font-medium text-gray-900">{{ user.direccion }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-lg transition font-semibold">
+            ← Volver al Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
