@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'bonds'
+
 urlpatterns = [
-    # Define URL patterns for the bonds app here
-    # Example: path('dashboard/', views.dashboard, name='bond_dashboard'),
+    path('create-bond/', views.create_bond_view, name='create_bond'),
 ]

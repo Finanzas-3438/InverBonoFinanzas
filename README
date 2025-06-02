@@ -19,3 +19,7 @@
 # Correr el proyecto
 
 ` python manage.py runserver `
+
+# Correr tailwind
+
+` npx tailwindcss -i ./InverBono/static/css/input.css -o ./InverBono/static/css/output.css --watch `

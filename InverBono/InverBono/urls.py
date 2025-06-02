@@ -15,9 +15,24 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic.base import RedirectView 
+from accounts import views as account_views
+from django.shortcuts import render
+
+def custom_404(request, exception=None):
+    return render(request, '404.html', status=404)
+
+handler404 = custom_404
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
+    path('login/', account_views.login_view, name='login'),
+    path('perfil/', account_views.perfil_view, name='perfil'),
+    path('signup/', account_views.signup_view, name='signup'),
+    path('dashboard/', account_views.dashboard_view, name='dashboard'),
+    path('logout/', account_views.logout_view, name='logout'),
+
     path('bonds/', include('bonds.urls')),
+
+    path('', RedirectView.as_view(url='/dashboard/', permanent=False), name='index'),
     ]

@@ -28,44 +28,48 @@
             name="email" id="email" placeholder="Correo" required>
         </fieldset>
 
-        <fieldset class="flex flex-col gap-1">
-          <label for="celular" class="text-sm text-slate-400">Teléfono<sup class="text-red-500">*</sup></label>
-          <input class="p-2 outline-yellow-600 rounded-md bg-gray-700 border-2 border-gray-500" type="text"
-            name="celular" id="celular" placeholder="Celular" required>
-        </fieldset>
-
-        <fieldset class="flex flex-col gap-1">
-          <label for="tipo_documento" class="text-sm text-slate-400">Tipo de documento</label>
-          <select name="tipo_documento" id="tipo_documento" class="p-2 bg-gray-700 border-2 border-gray-500 rounded-md">
-            <option value="DNI">DNI</option>
-            <option value="CE">Carné de extranjería</option>
-            <option value="PAS">Pasaporte</option>
-          </select>
-        </fieldset>
-
-        <fieldset class="flex flex-col gap-1">
-          <label for="documento" class="text-sm text-slate-400">Número de documento</label>
-          <input class="p-2 outline-yellow-600 rounded-md bg-gray-700 border-2 border-gray-500" type="text"
+        
+        <div class="grid grid-cols-2 gap-4">
+          <fieldset class="flex flex-col gap-1">
+            <label for="tipo_documento" class="text-sm text-slate-400">Tipo de documento</label>
+            <select name="tipo_documento" id="tipo_documento" class="p-2 bg-gray-700 border-2 border-gray-500 rounded-md">
+              <option value="DNI">DNI</option>
+              <option value="CE">Carné de extranjería</option>
+              <option value="PAS">Pasaporte</option>
+            </select>
+          </fieldset>
+          <fieldset class="flex flex-col gap-1">
+            <label for="documento" class="text-sm text-slate-400">Número de documento</label>
+            <input class="p-2 outline-yellow-600 rounded-md bg-gray-700 border-2 border-gray-500" type="text"
             name="documento" id="documento" placeholder="Documento" required>
-        </fieldset>
-
-        <fieldset class="flex flex-col gap-1">
-          <label for="direccion" class="text-sm text-slate-400">Dirección</label>
-          <input class="p-2 outline-yellow-600 rounded-md bg-gray-700 border-2 border-gray-500" type="text"
-            name="direccion" id="direccion" placeholder="Dirección" required>
-        </fieldset>
+          </fieldset>
+        </div>
 
         <fieldset class="flex flex-col gap-1">
           <label for="password" class="text-sm text-slate-400">Contraseña<sup class="text-red-500">*</sup></label>
           <input class="p-2 outline-yellow-600 rounded-md bg-gray-700 border-2 border-gray-500" type="password"
-            name="password" id="password" placeholder="Contraseña" required>
+          name="password" id="password" placeholder="Contraseña" required>
         </fieldset>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <fieldset class="flex flex-col gap-1">
+            <label for="direccion" class="text-sm text-slate-400">Dirección</label>
+            <input class="p-2 outline-yellow-600 rounded-md bg-gray-700 border-2 border-gray-500" type="text"
+              name="direccion" id="direccion" placeholder="Dirección" required>
+          </fieldset>
+          
+          <fieldset class="flex flex-col gap-1">
+            <label for="celular" class="text-sm text-slate-400">Teléfono<sup class="text-red-500">*</sup></label>
+            <input class="p-2 outline-yellow-600 rounded-md bg-gray-700 border-2 border-gray-500" type="text"
+              name="celular" id="celular" placeholder="Celular" required>
+          </fieldset>
+        </div>
 
         <button
-          class="py-2 w-full text-lg bg-yellow-600 text-white font-semibold hover:bg-yellow-800 rounded-md mt-3 text-center"
-          type="submit">Registrarse</button>
+        class="py-2 w-full text-lg bg-yellow-600 text-white font-semibold hover:bg-yellow-800 rounded-md mt-8 text-center"
+        type="submit">Registrarse</button>
       </form>
-
+      
       <p class="text-white font-light text-center mt-4">
         ¿Ya tienes cuenta?
         <a href="{% url 'login' %}" class="hover:underline text-yellow-300 font-medium ml-2">Inicia sesión</a>
