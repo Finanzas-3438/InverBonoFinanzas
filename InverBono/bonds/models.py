@@ -1,6 +1,7 @@
 from django.db import models
 
 class Bond(models.Model):
+    name = models.CharField(max_length=100, default="Bono #1")
     nominal_value = models.DecimalField(max_digits=20, decimal_places=2)
     commercial_value = models.DecimalField(max_digits=20, decimal_places=2)
     issue_date = models.DateField()

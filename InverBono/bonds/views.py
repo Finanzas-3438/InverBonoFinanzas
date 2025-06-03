@@ -11,6 +11,7 @@ def create_bond_view(request):
                 return None
 
         bond_data = {
+            'name': request.POST.get('bond_name', 'Bono #1'),
             'nominal_value': parse_decimal(request.POST.get('nominal_value')),
             'commercial_value': parse_decimal(request.POST.get('commercial_value')),
             'issue_date': request.POST.get('issue_date'),
@@ -27,7 +28,7 @@ def create_bond_view(request):
             'float_percentage': parse_decimal(request.POST.get('float_percentage')),
             'cavali_percentage': parse_decimal(request.POST.get('cavali_percentage')),
         }
-        bond_data = {k: v for k, v in bond_data.items() if v is not None or k in ['nominal_value', 'commercial_value', 'issue_date', 'years_number', 'coupon_frequency', 'interest_rate_type', 'capitalization', 'interest_rate', 'annual_discount_rate', 'income_tax']}
+        bond_data = {k: v for k, v in bond_data.items() if v is not None or k in ['nominal_value', 'commercial_value', 'issue_date', 'years_number', 'coupon_frequency', 'interest_rate_type', 'capitalization', 'interest_rate', 'annual_discount_rate', 'income_tax', 'nombre']}
         try:
             Bond.objects.create(**bond_data)
             return redirect('dashboard')

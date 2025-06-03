@@ -5,8 +5,6 @@
 {% include "_sidebar.html" %}
 <main class="min-h-screen bg-gradient-to-br from-yellow-100 via-white to-yellow-200 text-gray-900 flex items-center justify-center ml-56 p-8">
   <section class="w-full max-w-3xl bg-white/90 border border-yellow-200 rounded-3xl shadow-xl p-10 relative overflow-hidden">
-    <div class="absolute -top-16 -left-16 w-72 h-72 bg-yellow-200 opacity-20 rounded-full animate-pulse z-0"></div>
-    <div class="relative z-10">
       <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
         <div class="shrink-0 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full w-32 h-32 flex items-center justify-center text-5xl font-extrabold text-white shadow-lg animate-bounce-slow border-4 border-yellow-100">
           {{ user.nombres|slice:":1" }}{{ user.apellidos|slice:":1" }}
@@ -17,31 +15,31 @@
           </h1>
           <p class="text-base text-yellow-600 mb-8 text-center md:text-left">Este es el resumen de tu perfil personal.</p>
           <div class="grid md:grid-cols-2 gap-4">
-            <div class="bg-white/70 border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="bg-yellow-50/30 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-100">
               <p class="text-gray-500 text-xs">Nombres</p>
               <p class="font-semibold text-gray-900 text-base">{{ user.nombres }}</p>
             </div>
-            <div class="bg-white/70 border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="bg-yellow-50/30 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-100">
               <p class="text-gray-500 text-xs">Apellidos</p>
               <p class="font-semibold text-gray-900 text-base">{{ user.apellidos }}</p>
             </div>
-            <div class="bg-white/70 border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="bg-yellow-50/30 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-100">
               <p class="text-gray-500 text-xs">Correo electrónico</p>
               <p class="font-semibold text-gray-900 text-base">{{ user.email }}</p>
             </div>
-            <div class="bg-white/70 border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="bg-yellow-50/30 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-100">
               <p class="text-gray-500 text-xs">Celular</p>
               <p class="font-semibold text-gray-900 text-base">{{ user.celular }}</p>
             </div>
-            <div class="bg-white/70 border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="bg-yellow-50/30 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-100">
               <p class="text-gray-500 text-xs">Tipo de documento</p>
               <p class="font-semibold text-gray-900 text-base">{{ user.tipo_documento }}</p>
             </div>
-            <div class="bg-white/70 border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="bg-yellow-50/30 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-100">
               <p class="text-gray-500 text-xs">N° de documento</p>
               <p class="font-semibold text-gray-900 text-base">{{ user.documento }}</p>
             </div>
-            <div class="md:col-span-2 bg-white/70 border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="md:col-span-2 bg-yellow-50/30 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-100">
               <p class="text-gray-500 text-xs">Dirección</p>
               <p class="font-semibold text-gray-900 text-base">{{ user.direccion }}</p>
             </div>
