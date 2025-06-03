@@ -35,8 +35,8 @@
       <div>
       <section class="bg-yellow-600 rounded-lg p-2 mb-4">
         <a href="{% url 'perfil' %}" class="p-2 rounded-md hover:bg-yellow-700 block">
-            <h3 class="font-semibold text-lg">{{ user.nombres }} {{ user.apellidos }}</h3>
-            <p class="text-xs mt-0.5">{{ user.email }}</p>
+            <h3 class="font-semibold text-lg truncate">{{ user.nombres }} {{ user.apellidos }}</h3>
+            <p class="text-xs mt-0.5 truncate">{{ user.email }}</p>
         </a>
         <form method="POST" action="{% url 'logout' %}" class="mt-3">
             {% csrf_token %}

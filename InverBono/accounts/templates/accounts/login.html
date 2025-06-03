@@ -59,7 +59,8 @@
       textDisplay.style.transform = "translate(-50%, -50%)";
       textDisplay.style.color = "white";
       textDisplay.style.fontSize = "4rem"; 
-      textDisplay.style.fontFamily = "monospace, sans-serif";
+      textDisplay.style.fontFamily = "'Montserrat', 'Segoe UI', 'Arial', 'sans-serif'";
+      textDisplay.style.fontWeight = "bold";
       textDisplay.innerHTML = "";
       overlay.appendChild(textDisplay);
       
@@ -118,6 +119,27 @@
           }, 300);
         };
       });
+
+      const loginForm = document.querySelector('form[method="POST"]');
+      if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+          const errorMsg = document.querySelector('.text-red-500.font-semibold');
+          if (errorMsg && errorMsg.textContent.trim() !== "") {
+            return;
+          }
+          e.preventDefault();
+          textDisplay.innerHTML = "";
+          overlay.style.transform = "translateX(0%)";
+          setTimeout(() => {
+            const typingDelay = 150;
+            typeTextEffect("InverBono", textDisplay, typingDelay, () => {
+              setTimeout(() => {
+                loginForm.submit();
+              }, 500);
+            });
+          }, 300);
+        });
+      }
 
       window.addEventListener('pageshow', function (event) {
         overlay.style.transition = 'none';
