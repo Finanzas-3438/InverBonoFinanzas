@@ -9,133 +9,143 @@
   <h2 class="text-5xl font-bold">Registra tu bono</h2>
   <h3 class="text-xl font-light mt-2">Ingresa la informacion necesario para obtener datos sobre tu bono.</h3>
 
-  <section class="w-6/12 flex flex-col gap-4 pt-8">
+  <form method="POST">
+    {% csrf_token %}
+    <section class="w-6/12 flex flex-col gap-4 pt-8">
 
-    <div class="flex gap-4 items-center">
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="display_valor_nominal" class="bond-label">Valor Nominal</label>
-        <input id="display_valor_nominal" data-as-currency="true" class="bond-input" type="text" inputmode="decimal" required>
-        <input type="hidden" name="valor_nominal" id="valor_nominal">
-      </fieldset>
-
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="display_valor_comercial" class="bond-label">Valor Comercial</label>
-        <input id="display_valor_comercial" data-as-currency="true" class="bond-input" type="text" inputmode="decimal" required>
-        <input type="hidden" name="valor_comercial" id="valor_comercial">
-      </fieldset>
-
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="fecha_emision" class="bond-label">Fecha de emisión</label>
-        <input id="fecha_emision" name="fecha_emision" class="bond-input" type="date" required>
-      </fieldset>
-    </div>
-
-    <div class="flex gap-4 items-center">
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="frecuencia_cupon" class="bond-label">Frecuencia del cupón</label>
-        <select id="frecuencia_cupon" name="frecuencia_cupon" class="bond-input">
-          <option value="diaria">Diaria</option>
-          <option value="semanal">Semanal</option>
-          <option value="quincenal">Quincenal</option>
-          <option value="mensual">Mensual</option>
-          <option value="bimestral">Bimestral</option>
-          <option value="trimestral">Trimestral</option>
-          <option value="cuatrimestral">Cuatrimestral</option>
-          <option value="semestral">Semestral</option>
-          <option value="anual">Anual</option>
-        </select>
-      </fieldset>
-
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label class="bond-label">Tipo de tasa de interés</label>
-        <div class="mt-1 flex rounded-md shadow-sm">
-          <div class="relative flex items-stretch flex-grow focus-within:z-10">
-            <input type="radio" name="tipo_tasa_interes" id="tasa_efectiva" value="efectiva" class="sr-only peer/efectiva" checked>
-            <label for="tasa_efectiva" class="cursor-pointer rounded-l-md w-full py-1.5 text-sm font-medium text-gray-700 border border-gray-600 peer-checked/efectiva:bg-yellow-500 peer-checked/efectiva:text-white hover:bg-gray-200 bg-white text-center transition-colors duration-150 ease-in-out">Efectiva</label>
-          </div>
-          <div class="relative flex items-stretch flex-grow focus-within:z-10 -ml-px">
-            <input type="radio" name="tipo_tasa_interes" id="tasa_nominal" value="nominal" class="sr-only peer/nominal">
-            <label for="tasa_nominal" class="cursor-pointer rounded-r-md w-full py-1.5 text-sm font-medium text-gray-700 border border-gray-600 peer-checked/nominal:bg-yellow-500 peer-checked/nominal:text-white hover:bg-gray-200 bg-white text-center transition-colors duration-150 ease-in-out">Nominal</label>
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="capitalizacion" class="bond-label">Capitalizacion</label>
-        <select id="capitalizacion" name="capitalizacion" class="bond-input">
-          <option value="diaria">Diaria</option>
-          <option value="semanal">Semanal</option>
-          <option value="quincenal">Quincenal</option>
-          <option value="mensual">Mensual</option>
-          <option value="bimestral">Bimestral</option>
-          <option value="trimestral">Trimestral</option>
-          <option value="cuatrimestral">Cuatrimestral</option>
-          <option value="semestral">Semestral</option>
-          <option value="anual">Anual</option>
-        </select>
-      </fieldset>
-    </div>
-
-    <div class="flex gap-4 items-center">
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="tasa_interes" class="bond-label">Tasa de interés</label>
-        <div class="relative">
-          <input id="tasa_interes" name="tasa_interes" class="bond-input w-full pr-7" type="number" required>
-          <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
-        </div>
-      </fieldset>
-
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="tasa_anual_descuento" class="bond-label">Tasa anual de descuento</label>
-        <div class="relative">
-          <input id="tasa_anual_descuento" name="tasa_anual_descuento" class="bond-input w-full pr-7" type="number" required>
-          <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
-        </div>
-      </fieldset>
-
-      <fieldset class="flex flex-col gap-1 w-full">
-        <label for="imp_renta" class="bond-label">Imp. a la Renta</label>
-        <div class="relative">
-          <input id="imp_renta" name="imp_renta" class="bond-input w-full pr-7" type="number" required>
-          <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
-        </div>
-      </fieldset>
-    </div>
-
-    <div>
-      <h2 class="text-lg font-semibold">Gastos iniciales <sup class="font-normal">(Opcional)</sup></h2>
-
-      <div class="flex flex-col gap-3 mt-2 p-4 bg-gray-200 border-gray-300 border-2 rounded-xl w-fit">
-      
-        <fieldset class="flex items-center gap-4">
-          <label for="prima_percentage" class="bond-label w-28">% Prima</label>
-          <input id="prima_percentage" name="prima_percentage" class="bond-input" type="number" step="0.01">
+      <div class="flex gap-4 items-center">
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="nominal_value" class="bond-label">Valor Nominal</label>
+          <input id="display_nominal_value" data-as-currency="true" class="bond-input" type="text" inputmode="decimal" required>
+          <input type="hidden" name="nominal_value" id="nominal_value">
         </fieldset>
 
-        <fieldset class="flex items-center gap-4">
-          <label for="estructuracion_percentage" class="bond-label w-28">% Estructuración</label>
-          <input id="estructuracion_percentage" name="estructuracion_percentage" class="bond-input" type="number" step="0.01">
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="commercial_value" class="bond-label">Valor Comercial</label>
+          <input id="display_commercial_value" data-as-currency="true" class="bond-input" type="text" inputmode="decimal" required>
+          <input type="hidden" name="commercial_value" id="commercial_value">
         </fieldset>
 
-        <fieldset class="flex items-center gap-4">
-          <label for="colocacion_percentage" class="bond-label w-28">% Colocación</label>
-          <input id="colocacion_percentage" name="colocacion_percentage" class="bond-input" type="number" step="0.01">
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="issue_date" class="bond-label">Fecha de emisión</label>
+          <input id="issue_date" name="issue_date" class="bond-input" type="date" required>
         </fieldset>
 
-        <fieldset class="flex items-center gap-4">
-          <label for="flotacion_percentage" class="bond-label w-28">% Flotación</label>
-          <input id="flotacion_percentage" name="flotacion_percentage" class="bond-input" type="number" step="0.01">
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="years_number" class="bond-label">N° de años</label>
+          <input id="years_number" name="years_number" class="bond-input" type="number" required>
         </fieldset>
-
-        <fieldset class="flex items-center gap-4">
-          <label for="cavali_percentage" class="bond-label w-28">% CAVALI</label>
-          <input id="cavali_percentage" name="cavali_percentage" class="bond-input" type="number" step="0.01">
-        </fieldset>
-      
       </div>
-    </div>
 
-  </section>
+      <div class="flex gap-4 items-center">
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="coupon_frequency" class="bond-label">Frecuencia del cupón</label>
+          <select id="coupon_frequency" name="coupon_frequency" class="bond-input">
+            <option value="diaria">Diaria</option>
+            <option value="semanal">Semanal</option>
+            <option value="quincenal">Quincenal</option>
+            <option value="mensual">Mensual</option>
+            <option value="bimestral">Bimestral</option>
+            <option value="trimestral">Trimestral</option>
+            <option value="cuatrimestral">Cuatrimestral</option>
+            <option value="semestral">Semestral</option>
+            <option value="anual">Anual</option>
+          </select>
+        </fieldset>
+
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label class="bond-label">Tipo de tasa de interés</label>
+          <div class="mt-1 flex rounded-md shadow-sm">
+            <div class="relative flex items-stretch flex-grow focus-within:z-10">
+              <input type="radio" name="interest_rate_type" id="effective_rate" value="efectiva" class="sr-only peer/efectiva" checked>
+              <label for="effective_rate" class="cursor-pointer rounded-l-md w-full py-1.5 text-sm font-medium text-gray-700 border border-gray-600 peer-checked/efectiva:bg-yellow-500 peer-checked/efectiva:text-white hover:bg-gray-200 bg-white text-center transition-colors duration-150 ease-in-out">Efectiva</label>
+            </div>
+            <div class="relative flex items-stretch flex-grow focus-within:z-10 -ml-px">
+              <input type="radio" name="interest_rate_type" id="nominal_rate" value="nominal" class="sr-only peer/nominal">
+              <label for="nominal_rate" class="cursor-pointer rounded-r-md w-full py-1.5 text-sm font-medium text-gray-700 border border-gray-600 peer-checked/nominal:bg-yellow-500 peer-checked/nominal:text-white hover:bg-gray-200 bg-white text-center transition-colors duration-150 ease-in-out">Nominal</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="capitalization" class="bond-label">Capitalizacion</label>
+          <select id="capitalization" name="capitalization" class="bond-input">
+            <option value="diaria">Diaria</option>
+            <option value="semanal">Semanal</option>
+            <option value="quincenal">Quincenal</option>
+            <option value="mensual">Mensual</option>
+            <option value="bimestral">Bimestral</option>
+            <option value="trimestral">Trimestral</option>
+            <option value="cuatrimestral">Cuatrimestral</option>
+            <option value="semestral">Semestral</option>
+            <option value="anual">Anual</option>
+          </select>
+        </fieldset>
+      </div>
+
+      <div class="flex gap-4 items-center">
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="interest_rate" class="bond-label">Tasa de interés</label>
+          <div class="relative">
+            <input id="interest_rate" name="interest_rate" class="bond-input w-full pr-7" type="number" required>
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
+          </div>
+        </fieldset>
+
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="annual_discount_rate" class="bond-label">Tasa anual de descuento</label>
+          <div class="relative">
+            <input id="annual_discount_rate" name="annual_discount_rate" class="bond-input w-full pr-7" type="number" required>
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
+          </div>
+        </fieldset>
+
+        <fieldset class="flex flex-col gap-1 w-full">
+          <label for="income_tax" class="bond-label">Imp. a la Renta</label>
+          <div class="relative">
+            <input id="income_tax" name="income_tax" class="bond-input w-full pr-7" type="number" required>
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
+          </div>
+        </fieldset>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold">Gastos iniciales <sup class="font-normal">(Opcional)</sup></h2>
+
+        <div class="flex flex-col gap-3 mt-2 p-4 bg-gray-200 border-gray-300 border-2 rounded-xl w-fit">
+        
+          <fieldset class="flex items-center gap-4">
+            <label for="premium_percentage" class="bond-label w-28">% Prima</label>
+            <input id="premium_percentage" name="premium_percentage" class="bond-input" type="number" step="0.01">
+          </fieldset>
+
+          <fieldset class="flex items-center gap-4">
+            <label for="structuring_percentage" class="bond-label w-28">% Estructuración</label>
+            <input id="structuring_percentage" name="structuring_percentage" class="bond-input" type="number" step="0.01">
+          </fieldset>
+
+          <fieldset class="flex items-center gap-4">
+            <label for="placement_percentage" class="bond-label w-28">% Colocación</label>
+            <input id="placement_percentage" name="placement_percentage" class="bond-input" type="number" step="0.01">
+          </fieldset>
+
+          <fieldset class="flex items-center gap-4">
+            <label for="float_percentage" class="bond-label w-28">% Flotación</label>
+            <input id="float_percentage" name="float_percentage" class="bond-input" type="number" step="0.01">
+          </fieldset>
+
+          <fieldset class="flex items-center gap-4">
+            <label for="cavali_percentage" class="bond-label w-28">% CAVALI</label>
+            <input id="cavali_percentage" name="cavali_percentage" class="bond-input" type="number" step="0.01">
+          </fieldset>
+        
+        </div>
+      </div>
+
+      <button class="bg-yellow-600 p-2">Registrar</button>
+
+    </section>
+  </form>
 
 </main>
 

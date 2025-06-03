@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.contrib.auth import login
+from .models import User
+
 def login_view(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -17,9 +20,7 @@ def login_view(request):
 @login_required
 def perfil_view(request):
     return render(request, 'accounts/perfil.html', {'user': request.user})
-from django.shortcuts import render, redirect
-from .models import User
-from django.contrib.auth import login
+
 
 
 def signup_view(request):

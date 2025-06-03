@@ -33,4 +33,100 @@
   <p class="mt-4 text-red-500 font-semibold">{{ error }}</p>
   {% endif %}
 </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let overlay = document.createElement("div");
+      overlay.classList.add(
+        "bg-black",
+        "fixed",
+        "top-0",
+        "left-0",
+        "w-full",
+        "h-full",
+        "z-50",
+        "transition-transform",
+        "duration-300",
+        "ease-in-out"
+      );
+      overlay.style.transform = "translateX(-100%)";
+      overlay.style.opacity = "1";
+      
+      const textDisplay = document.createElement("div");
+      textDisplay.style.position = "absolute";
+      textDisplay.style.top = "50%";
+      textDisplay.style.left = "50%";
+      textDisplay.style.transform = "translate(-50%, -50%)";
+      textDisplay.style.color = "white";
+      textDisplay.style.fontSize = "4rem"; 
+      textDisplay.style.fontFamily = "monospace, sans-serif";
+      textDisplay.innerHTML = "";
+      overlay.appendChild(textDisplay);
+      
+      document.body.appendChild(overlay);
+
+      function typeTextEffect(textToType, element, charDelay, onComplete) {
+        let i = 0;
+        element.innerHTML = "";
+        function type() {
+          if (i < textToType.length) {
+            element.innerHTML += textToType.charAt(i);
+            i++;
+            setTimeout(type, charDelay);
+          } else {
+            if (onComplete) {
+              onComplete();
+            }
+          }
+        }
+        type();
+      }
+
+      document.querySelectorAll("a").forEach((el) => {
+        let href = el.getAttribute("href");
+        if (!href) return;
+
+        el.classList.add("cursor-pointer");
+
+        el.onclick = (e) => {
+          if (href.startsWith("#")) {
+            return;
+          }
+          const targetUrl = new URL(href, window.location.origin);
+          if (targetUrl.href === window.location.href) {
+            return;
+          }
+
+          if (targetUrl.origin === window.location.origin &&
+            targetUrl.pathname === window.location.pathname &&
+            targetUrl.search === window.location.search &&
+            targetUrl.hash !== "" && targetUrl.hash !== window.location.hash) {
+            return;
+          }
+
+          e.preventDefault();
+          textDisplay.innerHTML = "";
+          overlay.style.transform = "translateX(0%)"; 
+
+          setTimeout(() => {
+            const typingDelay = 150; 
+            typeTextEffect("InverBono", textDisplay, typingDelay, () => {
+              setTimeout(() => {
+                window.location.href = href;
+              }, 500); 
+            });
+          }, 300);
+        };
+      });
+
+      window.addEventListener('pageshow', function (event) {
+        overlay.style.transition = 'none';
+        overlay.style.transform = 'translateX(-100%)';
+        textDisplay.innerHTML = "";
+        setTimeout(() => {
+          overlay.style.transition = 'transform 0.3s ease-in-out';
+        }, 0);
+      });
+    });
+  </script>
 {% endblock %}
