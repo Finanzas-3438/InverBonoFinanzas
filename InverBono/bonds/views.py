@@ -35,3 +35,32 @@ def create_bond_view(request):
         except Exception as e:
             return render(request, 'create-bond.html', {'error': str(e)})
     return render(request, 'create-bond.html')
+
+def list_bonds_view(request):
+    db_error = False
+    try:
+        bonds = list(Bond.objects.all().order_by('-issue_date'))
+    except Exception:
+        db_error = True
+        from collections import namedtuple
+        BondMock = namedtuple('Bond', ['name', 'nominal_value', 'commercial_value', 'interest_rate', 'issue_date', 'get_coupon_frequency_display'])
+        import datetime
+        bonds = [
+            BondMock(
+                name='Bono Demo 1',
+                nominal_value=1000,
+                commercial_value=950,
+                interest_rate=5.5,
+                issue_date=datetime.date(2024, 6, 1),
+                get_coupon_frequency_display='Mensual',
+            ),
+            BondMock(
+                name='Bono Demo 2',
+                nominal_value=2000,
+                commercial_value=1800,
+                interest_rate=6.0,
+                issue_date=datetime.date(2024, 5, 15),
+                get_coupon_frequency_display='Trimestral',
+            ),
+        ]
+    return render(request, 'list.html', {'bonds': bonds, 'db_error': db_error})
