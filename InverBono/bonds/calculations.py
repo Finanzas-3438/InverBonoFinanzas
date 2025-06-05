@@ -99,6 +99,8 @@ def get_bondholder_initial_cost(commercial_value, floatation=None, cavali=None):
     return None
 
 
+
+
 # Ejemplo de uso:
 # cupon = calcular_cupon_anual(bond.nominal_value, bond.interest_rate)
 # total_gastos = calcular_valor_total_gastos(bond.premium_percentage, bond.structuring_percentage, ...)
