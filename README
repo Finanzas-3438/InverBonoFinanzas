@@ -20,6 +20,10 @@
 
 ` python manage.py runserver `
 
+# Correr tests
+
+` python InverBono\manage.py test bonds `
+
 # Correr tailwind
 
 ` npx tailwindcss -i ./InverBono/static/css/input.css -o ./InverBono/static/css/output.css --watch `

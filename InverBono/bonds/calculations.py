@@ -1,4 +1,5 @@
 from decimal import Decimal
+from .bond_flows import get_cash_flows, get_final_payment
 
 COUPON_FREQ_DAYS = {
     'diaria': 1,
@@ -98,8 +99,86 @@ def get_bondholder_initial_cost(commercial_value, floatation=None, cavali=None):
         return total_percentage * commercial_value
     return None
 
+def get_current_price(discount_rate, nominal_value, coupon_rate, periods, final_payment=None):
 
+    coupon = nominal_value * coupon_rate
+    cash_flows = [coupon] * (periods - 1)
+    if final_payment is None:
+        final_payment = nominal_value + coupon
+    cash_flows.append(final_payment)
+    npv = sum(cf / (Decimal('1') + discount_rate) ** (i + 1) for i, cf in enumerate(cash_flows))
+    return npv
 
+def get_profit_or_loss(initial_flow, discount_rate, nominal_value, coupon_rate, periods, final_payment=None):
+
+    price = get_current_price(discount_rate, nominal_value, coupon_rate, periods, final_payment)
+    return initial_flow + price
+
+def get_duration(discount_rate, nominal_value, coupon_rate, periods, coupon_frequency, premium_percentage=None):
+    """Calculates the Macaulay Duration of a bond in years."""
+    periods_per_year = get_periods_per_year(coupon_frequency)
+    if periods_per_year is None or periods_per_year == Decimal('0'):
+        return None
+    cash_flows = get_cash_flows(nominal_value, coupon_rate, periods, premium_percentage)
+    bond_price = get_current_price(discount_rate, nominal_value, coupon_rate, periods, get_final_payment(nominal_value, coupon_rate, premium_percentage))
+    if bond_price is None or bond_price == Decimal('0') or discount_rate is None:
+        return None
+    weighted_pv_sum = Decimal('0')
+    one_plus_dr = Decimal('1') + discount_rate
+    for i, cf in enumerate(cash_flows):
+        t = Decimal(str(i + 1))
+        if one_plus_dr == Decimal('0') and t > Decimal('0'):
+            return None
+        if one_plus_dr ** t == Decimal('0'):
+            return None
+        pv_cf = cf / (one_plus_dr ** t)
+        weighted_pv_sum += t * pv_cf
+    duration_periods = weighted_pv_sum / bond_price
+    duration_years = duration_periods / periods_per_year
+    return duration_years
+
+def get_convexity(discount_rate, nominal_value, coupon_rate, periods, coupon_frequency, premium_percentage=None):
+    """
+    Calculates the Convexity of a bond in years^2.
+    The result is scaled by 1/M^2 where M is periods_per_year.
+    """
+    periods_per_year = get_periods_per_year(coupon_frequency)
+    if periods_per_year is None or periods_per_year == Decimal('0'):
+        return None
+    cash_flows = get_cash_flows(nominal_value, coupon_rate, periods, premium_percentage)
+    bond_price = get_current_price(discount_rate, nominal_value, coupon_rate, periods, get_final_payment(nominal_value, coupon_rate, premium_percentage))
+    if bond_price is None or bond_price == Decimal('0') or discount_rate is None:
+        return None
+    convexity_numerator_unscaled = Decimal('0')
+    one_plus_dr = Decimal('1') + discount_rate
+    for i, cf in enumerate(cash_flows):
+        t = Decimal(str(i + 1))
+        term_numerator = cf * t * (t + Decimal('1'))
+        power_val = t + Decimal('2')
+        if one_plus_dr == Decimal('0') and power_val > Decimal('0'):
+            return None
+        denominator_power_term = one_plus_dr ** power_val
+        if denominator_power_term == Decimal('0'):
+            return None
+        convexity_numerator_unscaled += term_numerator / denominator_power_term
+    c_periods_sq = convexity_numerator_unscaled / bond_price
+    convexity_years = c_periods_sq / (periods_per_year ** Decimal('2'))
+    return convexity_years
+
+def get_modified_duration(duration_years, discount_rate):
+    """Calculates the Modified Duration of a bond in years."""
+    if duration_years is None or discount_rate is None:
+        return None
+    one_plus_dr = Decimal('1') + discount_rate
+    if one_plus_dr == Decimal('0'):
+        return None
+    return duration_years / one_plus_dr
+
+def get_total_value(duration_years, convexity_years):
+    """Calculates the sum of duration and convexity in years."""
+    if duration_years is None or convexity_years is None:
+        return None
+    return duration_years + convexity_years
 
 # Ejemplo de uso:
 # cupon = calcular_cupon_anual(bond.nominal_value, bond.interest_rate)

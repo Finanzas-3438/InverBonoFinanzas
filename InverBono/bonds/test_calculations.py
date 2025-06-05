@@ -45,29 +45,20 @@ class BondCalculationsTest(TestCase):
     # tasa efectiva anual 
     def test_get_effective_rate(self):
         result = calculations.get_effective_rate(self.bond.interest_rate / Decimal('100'), self.bond.interest_rate_type, calculations.get_capitalization_days(self.bond.capitalization))
-        self.assertEqual(result, self.bond.interest_rate / Decimal('100'))
+        self.assertEqual(result, Decimal('0.09'))  # 9,0000%
 
     # tasa efectiva periodo
     def test_get_effective_rate_by_coupon_frequency(self):
         result = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / Decimal('100'), self.bond.coupon_frequency)
-        expected = (Decimal('1') + self.bond.interest_rate / Decimal('100')) ** (Decimal('180')/Decimal('360')) - Decimal('1')
-        self.assertAlmostEqual(result, expected)
+        self.assertAlmostEqual(result, Decimal('0.04403'), places=5)  # 4,403%
 
     # COK periodo 
     def test_get_cok(self):
         result = calculations.get_cok(self.bond.annual_discount_rate / Decimal('100'))
-        expected = (Decimal('1') + self.bond.annual_discount_rate / Decimal('100')) ** (Decimal('180')/Decimal('360')) - Decimal('1')
-        self.assertAlmostEqual(result, expected)
+        self.assertAlmostEqual(result, Decimal('0.02956'), places=5)  # 2,956%
 
     # costes iniciales emisor
     def test_get_issuer_initial_cost(self):
-        total_percentage = sum([
-            self.bond.structuring_percentage,
-            self.bond.placement_percentage,
-            self.bond.float_percentage,
-            self.bond.cavali_percentage
-        ]) / Decimal('100')
-        expected = total_percentage * self.bond.commercial_value
         result = calculations.get_issuer_initial_cost(
             self.bond.commercial_value,
             structuring=self.bond.structuring_percentage / Decimal('100'),
@@ -75,19 +66,144 @@ class BondCalculationsTest(TestCase):
             floatation=self.bond.float_percentage / Decimal('100'),
             cavali=self.bond.cavali_percentage / Decimal('100'),
         )
-        self.assertAlmostEqual(result, expected)
+        self.assertAlmostEqual(result, Decimal('14.18'), places=2)
 
-    # coster iniciales bonista
+    # costes iniciales bonista
     def test_get_bondholder_initial_cost(self):
-        total_percentage = sum([
-            self.bond.float_percentage,
-            self.bond.cavali_percentage
-        ]) / Decimal('100')
-        expected = total_percentage * self.bond.commercial_value
         result = calculations.get_bondholder_initial_cost(
             self.bond.commercial_value,
             floatation=self.bond.float_percentage / Decimal('100'),
             cavali=self.bond.cavali_percentage / Decimal('100'),
         )
-        self.assertAlmostEqual(result, expected)
+        self.assertAlmostEqual(result, Decimal('6.83'), places=2)
+
+    # precio actual
+    def test_get_current_price(self):
+        """Test the calculation of bond current price using get_bond_current_price with setup data."""
+        discount_rate = calculations.get_cok(self.bond.annual_discount_rate / 100)
+        nominal_value = self.bond.nominal_value
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / 100, self.bond.coupon_frequency)
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+
+        coupon_payment = nominal_value * coupon_rate
+        premium_amount = nominal_value * (self.bond.premium_percentage / 100)
+
+        final_payment = nominal_value + premium_amount + coupon_payment
+        
+        result = calculations.get_current_price(
+            discount_rate,
+            nominal_value,
+            coupon_rate,
+            periods,
+            final_payment
+        )
+        self.assertAlmostEqual(result, Decimal('1086.88'), places=2)
+
+    # utlidad / perdida
+    def test_get_profit_or_loss(self):
+        """Test the calculation of bond profit/loss using get_bond_profit_or_loss with setup data."""
+        discount_rate = calculations.get_cok(self.bond.annual_discount_rate / 100)
+        nominal_value = self.bond.nominal_value
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / 100, self.bond.coupon_frequency)
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        
+        initial_cost_bond = calculations.get_bondholder_initial_cost(
+            self.bond.commercial_value,
+            floatation=self.bond.float_percentage / 100,
+            cavali=self.bond.cavali_percentage / 100,
+        )
+        
+        initial_flow = - self.bond.commercial_value - initial_cost_bond
+
+        coupon_payment = nominal_value * coupon_rate
+        premium_amount = nominal_value * (self.bond.premium_percentage / 100)
+        final_payment_with_premium = nominal_value + premium_amount + coupon_payment
+        
+        result = calculations.get_profit_or_loss(
+            initial_flow,
+            discount_rate,
+            nominal_value,
+            coupon_rate,
+            periods,
+            final_payment=final_payment_with_premium
+        )
+        self.assertAlmostEqual(result, Decimal('30.06'), places=2)
+
+    # duracion
+    def test_get_duration(self):
+        """Test Macaulay Duration calculation."""
+        discount_rate = calculations.get_cok(self.bond.annual_discount_rate / 100)
+        nominal_value = self.bond.nominal_value
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / 100, self.bond.coupon_frequency)
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        result = calculations.get_duration(
+            discount_rate,
+            nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage
+        )
+        self.assertAlmostEqual(result, Decimal('2.72'), places=2)
+
+    # convexidad
+    def test_get_convexity(self):
+        """Test Convexity calculation."""
+        discount_rate = calculations.get_cok(self.bond.annual_discount_rate / 100)
+        nominal_value = self.bond.nominal_value
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / 100, self.bond.coupon_frequency)
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        result = calculations.get_convexity(
+            discount_rate,
+            nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage
+        )
+        self.assertAlmostEqual(result, Decimal('8.66'), places=2)
+
+    # duracion modificada
+    def test_get_modified_duration(self):
+        """Test Modified Duration calculation."""
+        discount_rate = calculations.get_cok(self.bond.annual_discount_rate / 100)
+        nominal_value = self.bond.nominal_value
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / 100, self.bond.coupon_frequency)
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        duration = calculations.get_duration(
+            discount_rate,
+            nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage
+        )
+        result = calculations.get_modified_duration(duration, discount_rate)
+        self.assertAlmostEqual(result, Decimal('2.64'), places=2)
+
+    # curacion + convexidad
+    def test_get_total_value(self):
+        """Test Total (Duration + Convexity) calculation."""
+        discount_rate = calculations.get_cok(self.bond.annual_discount_rate / 100)
+        nominal_value = self.bond.nominal_value
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / 100, self.bond.coupon_frequency)
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        duration = calculations.get_duration(
+            discount_rate,
+            nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage
+        )
+        convexity = calculations.get_convexity(
+            discount_rate,
+            nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage
+        )
+        result = calculations.get_total_value(duration, convexity)
+        self.assertAlmostEqual(result, Decimal('11.38'), places=2)
 
