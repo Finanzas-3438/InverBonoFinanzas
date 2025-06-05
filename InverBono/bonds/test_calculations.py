@@ -207,3 +207,105 @@ class BondCalculationsTest(TestCase):
         result = calculations.get_total_value(duration, convexity)
         self.assertAlmostEqual(result, Decimal('11.38'), places=2)
 
+    # tcea emisor
+    def test_tcea_issuer(self):
+        """Test TCEA Emisor (360 y 365 días) usando solo datos del bond y helpers de bond_flows."""
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / Decimal('100'), self.bond.coupon_frequency)
+        issuer_initial_cost = calculations.get_issuer_initial_cost(
+            self.bond.commercial_value,
+            structuring=self.bond.structuring_percentage / Decimal('100'),
+            placement=self.bond.placement_percentage / Decimal('100'),
+            floatation=self.bond.float_percentage / Decimal('100'),
+            cavali=self.bond.cavali_percentage / Decimal('100'),
+        )
+        initial_flow = -self.bond.commercial_value + issuer_initial_cost
+        tcea_360 = calculations.tcea_issuer(
+            initial_flow,
+            self.bond.nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage,
+            use_365=False
+        )
+        tcea_365 = calculations.tcea_issuer(
+            initial_flow,
+            self.bond.nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage,
+            use_365=True
+        )
+        self.assertAlmostEqual(tcea_360 * 100, Decimal('7.89747'), places=4)
+        self.assertAlmostEqual(tcea_365 * 100, Decimal('8.01144'), places=4)
+
+    # tcea emisor con flujo
+    def test_tcea_issuer_with_shield(self):
+        """Test TCEA Emisor con escudo (360 y 365 días) usando solo datos del bond y helpers de bond_flows."""
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / Decimal('100'), self.bond.coupon_frequency)
+        issuer_initial_cost = calculations.get_issuer_initial_cost(
+            self.bond.commercial_value,
+            structuring=self.bond.structuring_percentage / Decimal('100'),
+            placement=self.bond.placement_percentage / Decimal('100'),
+            floatation=self.bond.float_percentage / Decimal('100'),
+            cavali=self.bond.cavali_percentage / Decimal('100'),
+        )
+        initial_flow = -self.bond.commercial_value + issuer_initial_cost
+        tcea_360 = calculations.tcea_issuer_with_shield(
+            initial_flow,
+            self.bond.nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage,
+            income_tax=self.bond.income_tax,
+            use_365=False
+        )
+        tcea_365 = calculations.tcea_issuer_with_shield(
+            initial_flow,
+            self.bond.nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage,
+            income_tax=self.bond.income_tax,
+            use_365=True
+        )
+        self.assertAlmostEqual(tcea_360 * 100, Decimal('5.23904'), places=4)
+        self.assertAlmostEqual(tcea_365 * 100, Decimal('5.31371'), places=4)
+
+    # trea
+    def test_trea_bondholder(self):
+        """Test TREA Bonista (360 y 365 días) usando solo datos del bond y los flujos correctos del bonista."""
+        periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
+        coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / Decimal('100'), self.bond.coupon_frequency)
+        bondholder_initial_cost = calculations.get_bondholder_initial_cost(
+            self.bond.commercial_value,
+            floatation=self.bond.float_percentage / Decimal('100'),
+            cavali=self.bond.cavali_percentage / Decimal('100'),
+        )
+        initial_flow = -self.bond.commercial_value - bondholder_initial_cost
+        trea_360 = calculations.trea_bondholder(
+            initial_flow,
+            self.bond.nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage,
+            use_365=False
+        )
+        trea_365 = calculations.trea_bondholder(
+            initial_flow,
+            self.bond.nominal_value,
+            coupon_rate,
+            periods,
+            self.bond.coupon_frequency,
+            premium_percentage=self.bond.premium_percentage,
+            use_365=True
+        )
+        self.assertAlmostEqual(trea_360 * 100, Decimal('7.10120'), places=4)
+        self.assertAlmostEqual(trea_365 * 100, Decimal('7.20330'), places=4)
+

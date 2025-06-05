@@ -1,5 +1,14 @@
+# filepath: c:\Users\Augusto\Desktop\UPC\Septimo-Ciclo\Finanzas\InverBonoFinanzas\InverBono\bonds\calculations.py
 from decimal import Decimal
-from .bond_flows import get_cash_flows, get_final_payment
+from .bond_flows import (
+    get_coupon_payment,
+    get_final_payment,
+    get_issuer_flows,
+    get_issuer_flows_with_shield,
+    get_bondholder_flows,
+    get_cash_flows,
+    periodic_to_annual_rate,
+)
 
 COUPON_FREQ_DAYS = {
     'diaria': 1,
@@ -100,7 +109,7 @@ def get_bondholder_initial_cost(commercial_value, floatation=None, cavali=None):
     return None
 
 def get_current_price(discount_rate, nominal_value, coupon_rate, periods, final_payment=None):
-
+    """Calculate the current price of a bond."""
     coupon = nominal_value * coupon_rate
     cash_flows = [coupon] * (periods - 1)
     if final_payment is None:
@@ -110,7 +119,7 @@ def get_current_price(discount_rate, nominal_value, coupon_rate, periods, final_
     return npv
 
 def get_profit_or_loss(initial_flow, discount_rate, nominal_value, coupon_rate, periods, final_payment=None):
-
+    """Calculate profit or loss from bond investment."""
     price = get_current_price(discount_rate, nominal_value, coupon_rate, periods, final_payment)
     return initial_flow + price
 
@@ -180,6 +189,68 @@ def get_total_value(duration_years, convexity_years):
         return None
     return duration_years + convexity_years
 
-# Ejemplo de uso:
-# cupon = calcular_cupon_anual(bond.nominal_value, bond.interest_rate)
-# total_gastos = calcular_valor_total_gastos(bond.premium_percentage, bond.structuring_percentage, ...)
+def tcea_issuer(initial_flow, nominal_value, coupon_rate, periods, coupon_frequency, premium_percentage=None, use_365=False):
+    """Calcula la TCEA del emisor usando los flujos generados por get_issuer_flows de bond_flows."""
+    from .bond_flows import get_issuer_flows
+    issuer_flows = get_issuer_flows(nominal_value, coupon_rate, periods, premium_percentage)
+    from decimal import Decimal, getcontext
+    getcontext().prec = 12
+    tol = Decimal('0.0000001')
+    max_iter = 100
+    low = Decimal('0.00001')
+    high = Decimal('1')
+    for _ in range(max_iter):
+        mid = (low + high) / 2
+        npv = initial_flow + sum(cf / (Decimal('1') + mid) ** (i + 1) for i, cf in enumerate(issuer_flows))
+        if abs(npv) < tol:
+            break
+        if npv > 0:
+            low = mid
+        else:
+            high = mid
+    period_days = get_coupon_frequency_days(coupon_frequency)
+    return periodic_to_annual_rate(mid, period_days, use_365=use_365)
+
+def tcea_issuer_with_shield(initial_flow, nominal_value, coupon_rate, periods, coupon_frequency, premium_percentage=None, income_tax=None, use_365=False):
+    """Calcula la TCEA del emisor con escudo fiscal usando los flujos generados por get_issuer_flows_with_shield de bond_flows."""
+    from .bond_flows import get_issuer_flows_with_shield
+    issuer_flows_with_shield = get_issuer_flows_with_shield(nominal_value, coupon_rate, periods, premium_percentage, income_tax)
+    from decimal import Decimal, getcontext
+    getcontext().prec = 12
+    tol = Decimal('0.0000001')
+    max_iter = 100
+    low = Decimal('0.00001')
+    high = Decimal('1')
+    for _ in range(max_iter):
+        mid = (low + high) / 2
+        npv = initial_flow + sum(cf / (Decimal('1') + mid) ** (i + 1) for i, cf in enumerate(issuer_flows_with_shield))
+        if abs(npv) < tol:
+            break
+        if npv > 0:
+            low = mid
+        else:
+            high = mid
+    period_days = get_coupon_frequency_days(coupon_frequency)
+    return periodic_to_annual_rate(mid, period_days, use_365=use_365)
+
+def trea_bondholder(initial_flow, nominal_value, coupon_rate, periods, coupon_frequency, premium_percentage=None, use_365=False):
+    """Calcula la TREA del bonista usando los flujos generados por get_bondholder_flows de bond_flows."""
+    from .bond_flows import get_bondholder_flows
+    bondholder_flows = get_bondholder_flows(nominal_value, coupon_rate, periods, premium_percentage)
+    from decimal import Decimal, getcontext
+    getcontext().prec = 12
+    tol = Decimal('0.0000001')
+    max_iter = 100
+    low = Decimal('0.00001')
+    high = Decimal('1')
+    for _ in range(max_iter):
+        mid = (low + high) / 2
+        npv = initial_flow + sum(cf / (Decimal('1') + mid) ** (i + 1) for i, cf in enumerate(bondholder_flows))
+        if abs(npv) < tol:
+            break
+        if npv > 0:
+            low = mid
+        else:
+            high = mid
+    period_days = get_coupon_frequency_days(coupon_frequency)
+    return periodic_to_annual_rate(mid, period_days, use_365=use_365)
