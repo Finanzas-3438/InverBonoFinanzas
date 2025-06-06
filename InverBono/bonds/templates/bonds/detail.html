@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load bond_extras %}
+{% block title %}Detalle de bono{% endblock %}
+
+{% block content %}
+{% include "_sidebar.html" %}
+<main class="ml-56 min-h-screen p-8 bg-gradient-to-br from-yellow-100 via-white to-yellow-100">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-3xl font-extrabold text-yellow-700">{{ bond.name }}</h2>
+        <p class="text-gray-500 text-sm mt-1">Emisión: <span class="font-semibold">{{ bond.issue_date|date:'d/m/Y' }}</span></p>
+      </div>
+      <div class="flex gap-2">
+        <a href="{% url 'dashboard' %}" class="px-4 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 shadow transition">Volver</a>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
+        <span class="text-xs text-gray-500">Nominal</span>
+        <span class="text-lg font-bold text-green-900">S/ {{ bond.nominal_value|floatformat:2 }}</span>
+      </div>
+      <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
+        <span class="text-xs text-gray-500">Comercial</span>
+        <span class="text-lg font-bold text-yellow-600">S/ {{ bond.commercial_value|floatformat:2 }}</span>
+      </div>
+      <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
+        <span class="text-xs text-gray-500">Tasa</span>
+        <span class="text-lg font-bold text-yellow-700">{{ bond.interest_rate }}%</span>
+      </div>
+      <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
+        <span class="text-xs text-gray-500">Frecuencia</span>
+        <span class="text-lg font-bold text-yellow-700">{{ bond.get_coupon_frequency_display }}</span>
+      </div>
+    </div>
+    <div class="flex gap-4 mb-8">
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-gray-500">Precio Actual</span>
+        <span class="px-2 py-1 rounded-md font-medium bg-yellow-200 text-yellow-700">S/ {{ bond.precio_actual|floatformat:2 }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-gray-500">Utilidad / Pérdida</span>
+        <span class="px-3 py-1 rounded-full font-bold text-white bg-green-500">S/ {{ bond.utilidad|floatformat:2 }}</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 flex flex-col items-center shadow">
+        <span class="text-xs text-yellow-700 font-semibold mb-1">TCEA Emisor</span>
+        <span class="text-2xl font-extrabold text-yellow-700">{{ bond.tcea_emisor|mul:100 }}%</span>
+        <span class="text-xs text-gray-500">(360 días)</span>
+      </div>
+      <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 flex flex-col items-center shadow">
+        <span class="text-xs text-yellow-700 font-semibold mb-1">TCEA Emisor c/Escudo</span>
+        <span class="text-2xl font-extrabold text-yellow-700">{{ bond.tcea_emisor_escudo|mul:100 }}%</span>
+        <span class="text-xs text-gray-500">(360 días)</span>
+      </div>
+      <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 flex flex-col items-center shadow">
+        <span class="text-xs text-yellow-700 font-semibold mb-1">TREA Bonista</span>
+        <span class="text-2xl font-extrabold text-yellow-700">{{ bond.trea_bonista|mul:100 }}%</span>
+        <span class="text-xs text-gray-500">(360 días)</span>
+      </div>
+    </div>
+    <div class="mb-8">
+      <button id="ratios-toggle" type="button" class="w-full flex items-center justify-between px-4 py-3 bg-yellow-200 hover:bg-yellow-300 rounded-xl font-bold text-yellow-800 shadow transition">
+        Más detalles
+        <svg id="ratios-arrow" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div id="ratios-content" class="hidden mt-2 bg-white/90 border border-yellow-200 rounded-xl p-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div>
+            <span class="text-xs text-gray-500">Duración</span>
+            <span class="block text-lg font-bold text-yellow-700">{{ bond.duracion|floatformat:2 }}</span>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">Convexidad</span>
+            <span class="block text-lg font-bold text-yellow-700">{{ bond.convexidad|floatformat:2 }}</span>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">Total</span>
+            <span class="block text-lg font-bold text-yellow-700">{{ bond.total|floatformat:2 }}</span>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">Duración Modificada</span>
+            <span class="block text-lg font-bold text-yellow-700">{{ bond.duracion_modificada|floatformat:2 }}</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-600">
+          <div>
+            <span class="block font-semibold text-blue-700">Días capitalización</span>
+            <span>{{ bond.capitalization_days }}</span>
+          </div>
+          <div>
+            <span class="block font-semibold text-blue-700">Nº Total de Periodos</span>
+            <span>{{ bond.total_periods }}</span>
+          </div>
+          <div>
+            <span class="block font-semibold text-blue-700">Costes Iniciales Emisor</span>
+            <span>S/ {{ bond.issuer_initial_cost|floatformat:2 }}</span>
+          </div>
+          <div>
+            <span class="block font-semibold text-blue-700">Costes Iniciales Bonista</span>
+            <span>S/ {{ bond.bondholder_initial_cost|floatformat:2 }}</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-4 mt-4 items-center">
+          <div class="flex flex-col items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+            <span class="text-xs text-blue-700 font-semibold">COK Semestral</span>
+            <span class="text-lg font-bold text-blue-700">{{ bond.cok|mul:100 }}%</span>
+          </div>
+          <div class="flex flex-col items-center px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <span class="text-xs text-yellow-700 font-semibold">Tasa efectiva anual</span>
+            <span class="text-base font-bold text-yellow-700">{{ bond.effective_annual_rate|mul:100 }}%</span>
+          </div>
+          <div class="flex flex-col items-center px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <span class="text-xs text-yellow-700 font-semibold">Tasa efectiva {{ bond.get_coupon_frequency_display }}</span>
+            <span class="text-base font-bold text-yellow-700">{{ bond.effective_coupon_rate|mul:100 }}%</span>
+          </div>
+        </div>
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const btn = document.getElementById('ratios-toggle');
+          const content = document.getElementById('ratios-content');
+          const arrow = document.getElementById('ratios-arrow');
+          btn.addEventListener('click', function() {
+            content.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+          });
+        });
+      </script>
+    </div>
+  </div>
+</main>
+{% endblock %}
