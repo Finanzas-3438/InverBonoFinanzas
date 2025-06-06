@@ -20,10 +20,10 @@ class BondCalculationsTest(TestCase):
             annual_discount_rate=Decimal('6'),  # %
             income_tax=Decimal('30'),  # %
             premium_percentage=Decimal('1'),  # %
-            structuring_percentage=Decimal('0.450'),
-            placement_percentage=Decimal('0.250'),
-            float_percentage=Decimal('0.150'),
-            cavali_percentage=Decimal('0.500'),
+            structuring_percentage=Decimal('0.45'),
+            placement_percentage=Decimal('0.25'),  
+            float_percentage=Decimal('0.15'),      
+            cavali_percentage=Decimal('0.50'),     
         )
 
     # frecuencia del cupon

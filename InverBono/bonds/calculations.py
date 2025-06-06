@@ -75,14 +75,21 @@ def get_effective_rate_by_coupon_frequency(effective_annual_rate, coupon_frequen
         return None
     return (Decimal('1') + effective_annual_rate) ** (Decimal(str(days)) / Decimal('360')) - Decimal('1')
 
-def get_cok(annual_discount_rate):
+def get_cok(annual_discount_rate, coupon_frequency=None):
     """
-    Returns the COK: (1 + annual_discount_rate) ** (180/360) - 1
+    Returns the COK: (1 + annual_discount_rate) ** (coupon_frequency_days/360) - 1
     All rates should be in decimal (e.g., 0.12 for 12%).
+    If coupon_frequency is None, defaults to 180 días (semestral, para compatibilidad).
     """
     if annual_discount_rate is None:
         return None
-    return (Decimal('1') + annual_discount_rate) ** (Decimal('180')/Decimal('360')) - Decimal('1')
+    if coupon_frequency is not None:
+        days = get_coupon_frequency_days(coupon_frequency)
+        if days is None:
+            days = 180
+    else:
+        days = 180
+    return (Decimal('1') + annual_discount_rate) ** (Decimal(str(days))/Decimal('360')) - Decimal('1')
 
 def get_issuer_initial_cost(commercial_value, structuring=None, placement=None, floatation=None, cavali=None):
     """
@@ -110,13 +117,19 @@ def get_bondholder_initial_cost(commercial_value, floatation=None, cavali=None):
         return total_percentage * commercial_value
     return None
 
-def get_current_price(discount_rate, nominal_value, coupon_rate, periods, final_payment=None):
+def get_current_price(discount_rate, nominal_value, coupon_rate, periods, final_payment=None, premium_percentage=None):
     """Calculate the current price of a bond."""
-    coupon = nominal_value * coupon_rate
-    cash_flows = [coupon] * (periods - 1)
-    if final_payment is None:
-        final_payment = nominal_value + coupon
-    cash_flows.append(final_payment)
+    periods = int(periods)  # Asegurar que periods es entero
+    if premium_percentage is not None:
+        from .bond_flows import get_cash_flows, get_final_payment
+        cash_flows = get_cash_flows(nominal_value, coupon_rate, periods, premium_percentage)
+        final_payment = get_final_payment(nominal_value, coupon_rate, premium_percentage)
+    else:
+        coupon = nominal_value * coupon_rate
+        cash_flows = [coupon] * (periods - 1)
+        if final_payment is None:
+            final_payment = nominal_value + coupon
+        cash_flows.append(final_payment)
     npv = sum(cf / (Decimal('1') + discount_rate) ** (i + 1) for i, cf in enumerate(cash_flows))
     return npv
 
@@ -260,6 +273,7 @@ def trea_bondholder(initial_flow, nominal_value, coupon_rate, periods, coupon_fr
 class BondOutcome:
     def __init__(self, bond):
         from . import calculations
+        from .bond_flows import get_final_payment
         # Datos base
         self.bond = bond
         self.coupon_frequency_days = calculations.get_coupon_frequency_days(bond.coupon_frequency)
@@ -284,12 +298,13 @@ class BondOutcome:
             cavali=(bond.cavali_percentage or 0) / Decimal('100'),
         )
         # Precio actual y utilidad
+        final_payment = get_final_payment(bond.nominal_value, self.effective_coupon_rate, bond.premium_percentage)
         self.precio_actual = calculations.get_current_price(
             self.cok,
             bond.nominal_value,
             self.effective_coupon_rate,
             int(self.total_periods),
-            None
+            final_payment
         )
         self.utilidad = calculations.get_profit_or_loss(
             -bond.commercial_value - self.bondholder_initial_cost,
@@ -297,7 +312,7 @@ class BondOutcome:
             bond.nominal_value,
             self.effective_coupon_rate,
             int(self.total_periods),
-            None
+            final_payment=final_payment
         )
         # Ratios de decisión
         self.duracion = calculations.get_duration(

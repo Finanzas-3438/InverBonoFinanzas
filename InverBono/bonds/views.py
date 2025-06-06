@@ -1,12 +1,32 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Bond
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_DOWN
 from .calculations import BondOutcome
 from django.core.exceptions import ValidationError
 
 def bond_detail(request, pk):
     bond = get_object_or_404(Bond, pk=pk)
     return render(request, 'bonds/detail.html', {'bond': bond})
+
+def truncate_decimal(value, max_digits, decimal_places):
+    if value is None:
+        return None
+    try:
+        d = Decimal(value)
+    except Exception:
+        return None
+    # Truncar a la cantidad de decimales permitidos
+    quantize_str = '1.' + ('0' * decimal_places)
+    d = d.quantize(Decimal(quantize_str), rounding=ROUND_DOWN)
+    # Limitar la cantidad de dígitos totales
+    sign, digits, exp = d.as_tuple()
+    digits = list(digits)
+    if len(digits) > max_digits:
+        # Quitar dígitos de la parte entera si es necesario
+        extra = len(digits) - max_digits
+        digits = digits[extra:]
+        d = Decimal((sign, tuple(digits), exp))
+    return d
 
 def create_bond_view(request):
     error_message = None
@@ -49,20 +69,21 @@ def create_bond_view(request):
                     return Decimal(val)
                 except Exception:
                     return Decimal('0')
-            bond_instance.tcea_emisor = to_decimal(outcome.tcea_emisor)
-            bond_instance.tcea_emisor_escudo = to_decimal(outcome.tcea_emisor_escudo)
-            bond_instance.trea_bonista = to_decimal(outcome.trea_bonista)
-            bond_instance.duracion = to_decimal(outcome.duracion)
-            bond_instance.convexidad = to_decimal(outcome.convexidad)
-            bond_instance.total = to_decimal(outcome.total)
-            bond_instance.duracion_modificada = to_decimal(outcome.duracion_modificada)
-            bond_instance.precio_actual = to_decimal(outcome.precio_actual)
-            bond_instance.utilidad = to_decimal(outcome.utilidad)
-            bond_instance.issuer_initial_cost = to_decimal(outcome.issuer_initial_cost)
-            bond_instance.bondholder_initial_cost = to_decimal(outcome.bondholder_initial_cost)
-            bond_instance.cok = to_decimal(outcome.cok)
-            bond_instance.effective_annual_rate = to_decimal(outcome.effective_annual_rate)
-            bond_instance.effective_coupon_rate = to_decimal(outcome.effective_coupon_rate)
+            # Truncar los campos calculados según el modelo
+            bond_instance.tcea_emisor = truncate_decimal(outcome.tcea_emisor, 10, 5)
+            bond_instance.tcea_emisor_escudo = truncate_decimal(outcome.tcea_emisor_escudo, 10, 5)
+            bond_instance.trea_bonista = truncate_decimal(outcome.trea_bonista, 10, 5)
+            bond_instance.duracion = truncate_decimal(outcome.duracion, 10, 4)
+            bond_instance.convexidad = truncate_decimal(outcome.convexidad, 10, 4)
+            bond_instance.total = truncate_decimal(outcome.total, 10, 4)
+            bond_instance.duracion_modificada = truncate_decimal(outcome.duracion_modificada, 10, 4)
+            bond_instance.precio_actual = truncate_decimal(outcome.precio_actual, 20, 2)
+            bond_instance.utilidad = truncate_decimal(outcome.utilidad, 20, 2)
+            bond_instance.issuer_initial_cost = truncate_decimal(outcome.issuer_initial_cost, 20, 2)
+            bond_instance.bondholder_initial_cost = truncate_decimal(outcome.bondholder_initial_cost, 20, 2)
+            bond_instance.cok = truncate_decimal(outcome.cok, 10, 5)
+            bond_instance.effective_annual_rate = truncate_decimal(outcome.effective_annual_rate, 10, 5)
+            bond_instance.effective_coupon_rate = truncate_decimal(outcome.effective_coupon_rate, 10, 5)
             bond_instance.capitalization_days = outcome.capitalization_days
             bond_instance.total_periods = int(outcome.total_periods) if outcome.total_periods is not None else 0
             bond_instance.coupon_frequency_days = outcome.coupon_frequency_days
@@ -84,4 +105,10 @@ def list_bonds_view(request):
         bonds = []
         db_error = True
     return render(request, 'list.html', {'bonds': bonds, 'db_error': db_error})
+
+def delete_bond_view(request, pk):
+    bond = get_object_or_404(Bond, pk=pk)
+    if request.method == 'POST':
+        bond.delete()
+    return redirect('bonds:list_bonds')
 
