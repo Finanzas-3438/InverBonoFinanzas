@@ -56,6 +56,10 @@ def create_bond_view(request):
             'placement_percentage': parse_decimal(request.POST.get('placement_percentage'), 0),
             'float_percentage': parse_decimal(request.POST.get('float_percentage'), 0),
             'cavali_percentage': parse_decimal(request.POST.get('cavali_percentage'), 0),
+            'structuring_type': request.POST.get('structuring_type'),
+            'placement_type': request.POST.get('placement_type'),
+            'float_type': request.POST.get('float_type'),
+            'cavali_type': request.POST.get('cavali_type'),
         }
 
         try:
@@ -88,7 +92,8 @@ def create_bond_view(request):
             bond_instance.total_periods = int(outcome.total_periods) if outcome.total_periods is not None else 0
             bond_instance.coupon_frequency_days = outcome.coupon_frequency_days
             bond_instance.periods_per_year = to_decimal(outcome.periods_per_year)
-            # 3. save
+            
+            # save
             bond_instance.save()
             return redirect('bonds:detail', pk=bond_instance.pk)
         except ValidationError as e:

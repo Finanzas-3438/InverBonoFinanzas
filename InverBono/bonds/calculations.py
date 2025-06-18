@@ -91,28 +91,38 @@ def get_cok(annual_discount_rate, coupon_frequency=None):
         days = 180
     return (Decimal('1') + annual_discount_rate) ** (Decimal(str(days))/Decimal('360')) - Decimal('1')
 
-def get_issuer_initial_cost(commercial_value, structuring=None, placement=None, floatation=None, cavali=None):
+def get_issuer_initial_cost(commercial_value, structuring=None, structuring_type='emisor', placement=None, placement_type='emisor', floatation=None, float_type='emisor', cavali=None, cavali_type='emisor'):
     """
-    Returns the initial cost for the issuer: sum of all optional costs (except premium) * commercial_value
+    Returns the initial cost for the issuer based on cost types.
     Percentages should be in decimal (e.g., 0.01 for 1%).
     """
     total_percentage = Decimal('0')
-    for val in [structuring, placement, floatation, cavali]:
-        if val is not None:
-            total_percentage += val
+    if structuring_type in ['emisor', 'ambos'] and structuring is not None:
+        total_percentage += structuring
+    if placement_type in ['emisor', 'ambos'] and placement is not None:
+        total_percentage += placement
+    if float_type in ['emisor', 'ambos'] and floatation is not None:
+        total_percentage += floatation
+    if cavali_type in ['emisor', 'ambos'] and cavali is not None:
+        total_percentage += cavali
     if commercial_value is not None:
         return total_percentage * commercial_value
     return None
 
-def get_bondholder_initial_cost(commercial_value, floatation=None, cavali=None):
+def get_bondholder_initial_cost(commercial_value, structuring=None, structuring_type='emisor', placement=None, placement_type='emisor', floatation=None, float_type='emisor', cavali=None, cavali_type='emisor'):
     """
-    Returns the initial cost for the bondholder: only floatation and cavali * commercial_value
+    Returns the initial cost for the bondholder based on cost types.
     Percentages should be in decimal (e.g., 0.01 for 1%).
     """
     total_percentage = Decimal('0')
-    for val in [floatation, cavali]:
-        if val is not None:
-            total_percentage += val
+    if structuring_type in ['bonista', 'ambos'] and structuring is not None:
+        total_percentage += structuring
+    if placement_type in ['bonista', 'ambos'] and placement is not None:
+        total_percentage += placement
+    if float_type in ['bonista', 'ambos'] and floatation is not None:
+        total_percentage += floatation
+    if cavali_type in ['bonista', 'ambos'] and cavali is not None:
+        total_percentage += cavali
     if commercial_value is not None:
         return total_percentage * commercial_value
     return None
@@ -284,27 +294,41 @@ class BondOutcome:
             bond.interest_rate / Decimal('100'), bond.interest_rate_type, self.capitalization_days)
         self.effective_coupon_rate = calculations.get_effective_rate_by_coupon_frequency(
             self.effective_annual_rate, bond.coupon_frequency)
-        self.cok = calculations.get_cok(bond.annual_discount_rate / Decimal('100'))
+        self.cok = calculations.get_cok(bond.annual_discount_rate / Decimal('100'), bond.coupon_frequency)
+        
+        # Initial costs based on types
         self.issuer_initial_cost = calculations.get_issuer_initial_cost(
             bond.commercial_value,
             structuring=(bond.structuring_percentage or 0) / Decimal('100'),
+            structuring_type=bond.structuring_type,
             placement=(bond.placement_percentage or 0) / Decimal('100'),
+            placement_type=bond.placement_type,
             floatation=(bond.float_percentage or 0) / Decimal('100'),
+            float_type=bond.float_type,
             cavali=(bond.cavali_percentage or 0) / Decimal('100'),
+            cavali_type=bond.cavali_type,
         )
         self.bondholder_initial_cost = calculations.get_bondholder_initial_cost(
             bond.commercial_value,
+            structuring=(bond.structuring_percentage or 0) / Decimal('100'),
+            structuring_type=bond.structuring_type,
+            placement=(bond.placement_percentage or 0) / Decimal('100'),
+            placement_type=bond.placement_type,
             floatation=(bond.float_percentage or 0) / Decimal('100'),
+            float_type=bond.float_type,
             cavali=(bond.cavali_percentage or 0) / Decimal('100'),
+            cavali_type=bond.cavali_type,
         )
+
         # Precio actual y utilidad
-        final_payment = get_final_payment(bond.nominal_value, self.effective_coupon_rate, bond.premium_percentage)
+        final_payment = get_final_payment(bond.nominal_value, self.effective_coupon_rate, (bond.premium_percentage or 0) / Decimal('100'))
         self.precio_actual = calculations.get_current_price(
             self.cok,
             bond.nominal_value,
             self.effective_coupon_rate,
             int(self.total_periods),
-            final_payment
+            final_payment=final_payment,
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100')
         )
         self.utilidad = calculations.get_profit_or_loss(
             -bond.commercial_value - self.bondholder_initial_cost,
@@ -321,7 +345,7 @@ class BondOutcome:
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100')
         )
         self.convexidad = calculations.get_convexity(
             self.cok,
@@ -329,47 +353,47 @@ class BondOutcome:
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100')
         )
         self.total = calculations.get_total_value(self.duracion, self.convexidad)
         self.duracion_modificada = calculations.get_modified_duration(self.duracion, self.cok)
         # Indicadores de rentabilidad
         self.tcea_emisor = calculations.tcea_issuer(
-            -bond.commercial_value + self.issuer_initial_cost,
+            bond.commercial_value - self.issuer_initial_cost,
             bond.nominal_value,
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage,
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100'),
             use_365=False
         )
         self.tcea_emisor_365 = calculations.tcea_issuer(
-            -bond.commercial_value + self.issuer_initial_cost,
+            bond.commercial_value - self.issuer_initial_cost,
             bond.nominal_value,
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage,
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100'),
             use_365=True
         )
         self.tcea_emisor_escudo = calculations.tcea_issuer_with_shield(
-            -bond.commercial_value + self.issuer_initial_cost,
+            bond.commercial_value - self.issuer_initial_cost,
             bond.nominal_value,
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage,
-            income_tax=bond.income_tax,
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100'),
+            income_tax=(bond.income_tax or 0) / Decimal('100'),
             use_365=False
         )
         self.tcea_emisor_escudo_365 = calculations.tcea_issuer_with_shield(
-            -bond.commercial_value + self.issuer_initial_cost,
+            bond.commercial_value - self.issuer_initial_cost,
             bond.nominal_value,
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage,
-            income_tax=bond.income_tax,
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100'),
+            income_tax=(bond.income_tax or 0) / Decimal('100'),
             use_365=True
         )
         self.trea_bonista = calculations.trea_bondholder(
@@ -378,7 +402,7 @@ class BondOutcome:
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage,
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100'),
             use_365=False
         )
         self.trea_bonista_365 = calculations.trea_bondholder(
@@ -387,6 +411,6 @@ class BondOutcome:
             self.effective_coupon_rate,
             int(self.total_periods),
             bond.coupon_frequency,
-            premium_percentage=bond.premium_percentage,
+            premium_percentage=(bond.premium_percentage or 0) / Decimal('100'),
             use_365=True
         )

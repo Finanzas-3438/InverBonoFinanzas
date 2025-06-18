@@ -43,6 +43,11 @@ class Bond(models.Model):
     float_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=0)
     cavali_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=0)
     
+    structuring_type = models.CharField(max_length=10, choices=[('emisor', 'Emisor'), ('bonista', 'Bonista'), ('ambos', 'Ambos')], default='emisor')
+    placement_type = models.CharField(max_length=10, choices=[('emisor', 'Emisor'), ('bonista', 'Bonista'), ('ambos', 'Ambos')], default='emisor')
+    float_type = models.CharField(max_length=10, choices=[('emisor', 'Emisor'), ('bonista', 'Bonista'), ('ambos', 'Ambos')], default='emisor')
+    cavali_type = models.CharField(max_length=10, choices=[('emisor', 'Emisor'), ('bonista', 'Bonista'), ('ambos', 'Ambos')], default='emisor')
+    
     # tcea_emisor calculada
     tcea_emisor = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
     # tcea_emisor_escudo calculada

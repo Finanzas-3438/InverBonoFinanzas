@@ -6,3 +6,5 @@ package-lock.json
 package.json
 *__pycache__*
 pyvenv.cfg
+Bono_ejemplo.xlsm
+Bono_example.csv
