@@ -24,6 +24,10 @@ class BondCalculationsTest(TestCase):
             placement_percentage=Decimal('0.25'),  
             float_percentage=Decimal('0.15'),      
             cavali_percentage=Decimal('0.50'),     
+            structuring_type='emisor',
+            placement_type='emisor',
+            float_type='ambos',
+            cavali_type='ambos',
         )
 
     # frecuencia del cupon
@@ -61,10 +65,14 @@ class BondCalculationsTest(TestCase):
     def test_get_issuer_initial_cost(self):
         result = calculations.get_issuer_initial_cost(
             self.bond.commercial_value,
-            structuring=self.bond.structuring_percentage / Decimal('100'),
-            placement=self.bond.placement_percentage / Decimal('100'),
-            floatation=self.bond.float_percentage / Decimal('100'),
-            cavali=self.bond.cavali_percentage / Decimal('100'),
+            structuring=self.bond.structuring_percentage,
+            structuring_type=self.bond.structuring_type,
+            placement=self.bond.placement_percentage,
+            placement_type=self.bond.placement_type,
+            floatation=self.bond.float_percentage,
+            float_type=self.bond.float_type,
+            cavali=self.bond.cavali_percentage,
+            cavali_type=self.bond.cavali_type,
         )
         self.assertAlmostEqual(result, Decimal('14.18'), places=2)
 
@@ -72,8 +80,14 @@ class BondCalculationsTest(TestCase):
     def test_get_bondholder_initial_cost(self):
         result = calculations.get_bondholder_initial_cost(
             self.bond.commercial_value,
-            floatation=self.bond.float_percentage / Decimal('100'),
-            cavali=self.bond.cavali_percentage / Decimal('100'),
+            structuring=self.bond.structuring_percentage,
+            structuring_type=self.bond.structuring_type,
+            placement=self.bond.placement_percentage,
+            placement_type=self.bond.placement_type,
+            floatation=self.bond.float_percentage,
+            float_type=self.bond.float_type,
+            cavali=self.bond.cavali_percentage,
+            cavali_type=self.bond.cavali_type,
         )
         self.assertAlmostEqual(result, Decimal('6.83'), places=2)
 
@@ -85,17 +99,12 @@ class BondCalculationsTest(TestCase):
         coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / 100, self.bond.coupon_frequency)
         periods = int(calculations.get_total_periods(self.bond.years_number, self.bond.coupon_frequency))
 
-        coupon_payment = nominal_value * coupon_rate
-        premium_amount = nominal_value * (self.bond.premium_percentage / 100)
-
-        final_payment = nominal_value + premium_amount + coupon_payment
-        
         result = calculations.get_current_price(
             discount_rate,
             nominal_value,
             coupon_rate,
             periods,
-            final_payment
+            premium_percentage=self.bond.premium_percentage
         )
         self.assertAlmostEqual(result, Decimal('1086.88'), places=2)
 
@@ -109,15 +118,17 @@ class BondCalculationsTest(TestCase):
         
         initial_cost_bond = calculations.get_bondholder_initial_cost(
             self.bond.commercial_value,
-            floatation=self.bond.float_percentage / 100,
-            cavali=self.bond.cavali_percentage / 100,
+            structuring=self.bond.structuring_percentage,
+            structuring_type=self.bond.structuring_type,
+            placement=self.bond.placement_percentage,
+            placement_type=self.bond.placement_type,
+            floatation=self.bond.float_percentage,
+            float_type=self.bond.float_type,
+            cavali=self.bond.cavali_percentage,
+            cavali_type=self.bond.cavali_type,
         )
         
         initial_flow = - self.bond.commercial_value - initial_cost_bond
-
-        coupon_payment = nominal_value * coupon_rate
-        premium_amount = nominal_value * (self.bond.premium_percentage / 100)
-        final_payment_with_premium = nominal_value + premium_amount + coupon_payment
         
         result = calculations.get_profit_or_loss(
             initial_flow,
@@ -125,7 +136,7 @@ class BondCalculationsTest(TestCase):
             nominal_value,
             coupon_rate,
             periods,
-            final_payment=final_payment_with_premium
+            premium_percentage=self.bond.premium_percentage
         )
         self.assertAlmostEqual(result, Decimal('30.06'), places=2)
 
@@ -214,10 +225,14 @@ class BondCalculationsTest(TestCase):
         coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / Decimal('100'), self.bond.coupon_frequency)
         issuer_initial_cost = calculations.get_issuer_initial_cost(
             self.bond.commercial_value,
-            structuring=self.bond.structuring_percentage / Decimal('100'),
-            placement=self.bond.placement_percentage / Decimal('100'),
-            floatation=self.bond.float_percentage / Decimal('100'),
-            cavali=self.bond.cavali_percentage / Decimal('100'),
+            structuring=self.bond.structuring_percentage,
+            structuring_type=self.bond.structuring_type,
+            placement=self.bond.placement_percentage,
+            placement_type=self.bond.placement_type,
+            floatation=self.bond.float_percentage,
+            float_type=self.bond.float_type,
+            cavali=self.bond.cavali_percentage,
+            cavali_type=self.bond.cavali_type,
         )
         initial_flow = -self.bond.commercial_value + issuer_initial_cost
         tcea_360 = calculations.tcea_issuer(
@@ -248,10 +263,14 @@ class BondCalculationsTest(TestCase):
         coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / Decimal('100'), self.bond.coupon_frequency)
         issuer_initial_cost = calculations.get_issuer_initial_cost(
             self.bond.commercial_value,
-            structuring=self.bond.structuring_percentage / Decimal('100'),
-            placement=self.bond.placement_percentage / Decimal('100'),
-            floatation=self.bond.float_percentage / Decimal('100'),
-            cavali=self.bond.cavali_percentage / Decimal('100'),
+            structuring=self.bond.structuring_percentage,
+            structuring_type=self.bond.structuring_type,
+            placement=self.bond.placement_percentage,
+            placement_type=self.bond.placement_type,
+            floatation=self.bond.float_percentage,
+            float_type=self.bond.float_type,
+            cavali=self.bond.cavali_percentage,
+            cavali_type=self.bond.cavali_type,
         )
         initial_flow = -self.bond.commercial_value + issuer_initial_cost
         tcea_360 = calculations.tcea_issuer_with_shield(
@@ -284,8 +303,14 @@ class BondCalculationsTest(TestCase):
         coupon_rate = calculations.get_effective_rate_by_coupon_frequency(self.bond.interest_rate / Decimal('100'), self.bond.coupon_frequency)
         bondholder_initial_cost = calculations.get_bondholder_initial_cost(
             self.bond.commercial_value,
-            floatation=self.bond.float_percentage / Decimal('100'),
-            cavali=self.bond.cavali_percentage / Decimal('100'),
+            structuring=self.bond.structuring_percentage,
+            structuring_type=self.bond.structuring_type,
+            placement=self.bond.placement_percentage,
+            placement_type=self.bond.placement_type,
+            floatation=self.bond.float_percentage,
+            float_type=self.bond.float_type,
+            cavali=self.bond.cavali_percentage,
+            cavali_type=self.bond.cavali_type,
         )
         initial_flow = -self.bond.commercial_value - bondholder_initial_cost
         trea_360 = calculations.trea_bondholder(

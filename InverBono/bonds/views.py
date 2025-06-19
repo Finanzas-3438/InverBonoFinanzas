@@ -64,7 +64,7 @@ def create_bond_view(request):
 
         try:
             bond_instance = Bond(**bond_data)
-            # calculating
+            # calcular
             outcome = BondOutcome(bond_instance)
             def to_decimal(val):
                 if val is None:
