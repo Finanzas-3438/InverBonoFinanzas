@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth import login
 from .models import User
+from bonds.models import Bond
 
 def login_view(request):
     if request.method == 'POST':
@@ -44,7 +45,8 @@ def signup_view(request):
 
 @login_required
 def dashboard_view(request):
-    return render(request, 'accounts/dashboard.html')
+    bonds = Bond.objects.all()
+    return render(request, 'accounts/dashboard.html', {'bonds': bonds})
 
 def logout_view(request):
     if request.method == 'POST':

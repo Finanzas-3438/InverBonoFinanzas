@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 .bond-input {
-    @apply bg-gray-50 rounded-md border-gray-600 border py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950
+    @apply bg-gray-50 rounded-md border-gray-600 border py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950;
 }
 
 .bond-label {
-    @apply text-gray-800 text-sm
+    @apply text-gray-800 text-sm;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -20,4 +20,17 @@ input[type="number"] {
   -moz-appearance: textfield; 
 }
 
-
+@layer components {
+  .tooltip-container {
+    @apply relative ml-1.5;
+  }
+  .tooltip-icon {
+    @apply flex items-center justify-center size-3 border border-yellow-700 rounded-full text-[8px] font-medium font-mono text-yellow-700 cursor-help;
+  }
+  .tooltip-text {
+    @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 transition-opacity duration-300 invisible z-10;
+  }
+  .tooltip-container:hover .tooltip-text {
+    @apply visible opacity-100;
+  }
+}

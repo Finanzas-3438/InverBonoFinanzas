@@ -3,10 +3,76 @@ from .models import Bond
 from decimal import Decimal, InvalidOperation, ROUND_DOWN
 from .calculations import BondOutcome
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
+import json
 
 def bond_detail(request, pk):
     bond = get_object_or_404(Bond, pk=pk)
     return render(request, 'bonds/detail.html', {'bond': bond})
+
+def bond_editor(request):
+    return render(request, 'editor.html')
+
+def calculate_bond_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            def parse_decimal(val, default=0):
+                try:
+                    if val in (None, '', ' '):
+                        return Decimal(default)
+                    return Decimal(val)
+                except (InvalidOperation, TypeError, ValueError):
+                    return Decimal(default)
+
+            bond_data = {
+                'name': data.get('name', 'Bono Temporal'),
+                'nominal_value': parse_decimal(data.get('nominal_value'), 0),
+                'commercial_value': parse_decimal(data.get('commercial_value'), 0),
+                'issue_date': data.get('issue_date'),
+                'years_number': parse_decimal(data.get('years_number'), 0),
+                'coupon_frequency': data.get('coupon_frequency'),
+                'interest_rate_type': data.get('interest_rate_type'),
+                'capitalization': data.get('capitalization'),
+                'interest_rate': parse_decimal(data.get('interest_rate'), 0),
+                'annual_discount_rate': parse_decimal(data.get('annual_discount_rate'), 0),
+                'income_tax': parse_decimal(data.get('income_tax'), 0),
+                'premium_percentage': parse_decimal(data.get('premium_percentage'), 0),
+                'structuring_percentage': parse_decimal(data.get('structuring_percentage'), 0),
+                'placement_percentage': parse_decimal(data.get('placement_percentage'), 0),
+                'float_percentage': parse_decimal(data.get('float_percentage'), 0),
+                'cavali_percentage': parse_decimal(data.get('cavali_percentage'), 0),
+                'structuring_type': data.get('structuring_type'),
+                'placement_type': data.get('placement_type'),
+                'float_type': data.get('float_type'),
+                'cavali_type': data.get('cavali_type'),
+            }
+
+            bond_instance = Bond(**bond_data)
+            outcome = BondOutcome(bond_instance)
+
+            results = {
+                'tcea_emisor': f'{outcome.tcea_emisor:.5%}' if outcome.tcea_emisor is not None else 'N/A',
+                'tcea_emisor_escudo': f'{outcome.tcea_emisor_escudo:.5%}' if outcome.tcea_emisor_escudo is not None else 'N/A',
+                'trea_bonista': f'{outcome.trea_bonista:.5%}' if outcome.trea_bonista is not None else 'N/A',
+                'duracion': f'{outcome.duracion:.4f}' if outcome.duracion is not None else 'N/A',
+                'convexidad': f'{outcome.convexidad:.4f}' if outcome.convexidad is not None else 'N/A',
+                'total': f'{outcome.total:.4f}' if outcome.total is not None else 'N/A',
+                'duracion_modificada': f'{outcome.duracion_modificada:.4f}' if outcome.duracion_modificada is not None else 'N/A',
+                'precio_actual': f'{outcome.precio_actual:,.2f}' if outcome.precio_actual is not None else 'N/A',
+                'utilidad': f'{outcome.utilidad:,.2f}' if outcome.utilidad is not None else 'N/A',
+                'issuer_initial_cost': f'{outcome.issuer_initial_cost:,.2f}' if outcome.issuer_initial_cost is not None else 'N/A',
+                'bondholder_initial_cost': f'{outcome.bondholder_initial_cost:,.2f}' if outcome.bondholder_initial_cost is not None else 'N/A',
+                'cok': f'{outcome.cok:.5%}' if outcome.cok is not None else 'N/A',
+                'total_periods': int(outcome.total_periods) if outcome.total_periods is not None else 'N/A'
+            }
+            return JsonResponse(results)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def truncate_decimal(value, max_digits, decimal_places):
     if value is None:

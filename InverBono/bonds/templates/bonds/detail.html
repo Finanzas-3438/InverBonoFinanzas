@@ -3,6 +3,7 @@
 {% block title %}Detalle de bono{% endblock %}
 
 {% block content %}
+
 {% include "_sidebar.html" %}
 <main class="ml-56 min-h-screen p-8 bg-gradient-to-br from-yellow-100 via-white to-yellow-100">
   <div class="max-w-4xl mx-auto">
@@ -17,45 +18,117 @@
     </div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
-        <span class="text-xs text-gray-500">Nominal</span>
+        <span class="text-xs text-gray-500 flex items-center">
+          Nominal
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-48">
+              Valor facial del bono, utilizado como base para calcular los pagos de intereses.
+            </div>
+          </div>
+        </span>
         <span class="text-lg font-bold text-green-900">S/ {{ bond.nominal_value|floatformat:2 }}</span>
       </div>
       <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
-        <span class="text-xs text-gray-500">Comercial</span>
+        <span class="text-xs text-gray-500 flex items-center">
+          Comercial
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-48">
+              Precio al que el bono se compra o vende en el mercado.
+            </div>
+          </div>
+        </span>
         <span class="text-lg font-bold text-yellow-600">S/ {{ bond.commercial_value|floatformat:2 }}</span>
       </div>
       <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
-        <span class="text-xs text-gray-500">Tasa</span>
+        <span class="text-xs text-gray-500 flex items-center">
+          Tasa
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-48">
+              Tasa de interés que el bono paga sobre su valor nominal.
+            </div>
+          </div>
+        </span>
         <span class="text-lg font-bold text-yellow-700">{{ bond.interest_rate }}%</span>
       </div>
       <div class="bg-white/90 border border-yellow-200 rounded-xl p-4 flex flex-col items-center">
-        <span class="text-xs text-gray-500">Frecuencia</span>
+        <span class="text-xs text-gray-500 flex items-center">
+          Frecuencia
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-48">
+              Frecuencia con la que se pagan los cupones del bono.
+            </div>
+          </div>
+        </span>
         <span class="text-lg font-bold text-yellow-700">{{ bond.get_coupon_frequency_display }}</span>
       </div>
     </div>
     <div class="flex gap-4 mb-8">
       <div class="flex items-center gap-2">
-        <span class="text-xs text-gray-500">Precio Actual</span>
+        <span class="text-xs text-gray-500 flex items-center">
+          Precio Actual
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-64">
+              Valor presente de los flujos de efectivo futuros del bono, descontados a la tasa de mercado (COK).
+            </div>
+          </div>
+        </span>
         <span class="px-2 py-1 rounded-md font-medium bg-yellow-200 text-yellow-700">S/ {{ bond.precio_actual|floatformat:2 }}</span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-xs text-gray-500">Utilidad / Pérdida</span>
+        <span class="text-xs text-gray-500 flex items-center">
+          Utilidad / Pérdida
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-64">
+              Ganancia o pérdida para el bonista, calculada como la diferencia entre el precio actual y el valor comercial más los costos iniciales.
+            </div>
+          </div>
+        </span>
         <span class="px-3 py-1 rounded-full font-bold text-white bg-green-500">S/ {{ bond.utilidad|floatformat:2 }}</span>
       </div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
       <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 flex flex-col items-center shadow">
-        <span class="text-xs text-yellow-700 font-semibold mb-1">TCEA Emisor</span>
+        <span class="text-xs text-yellow-700 font-semibold mb-1 flex items-center">
+          TCEA Emisor
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-64">
+              Tasa de Costo Efectivo Anual para el emisor. Refleja el costo real del financiamiento.
+            </div>
+          </div>
+        </span>
         <span class="text-2xl font-extrabold text-yellow-700">{{ bond.tcea_emisor|mul:100|floatformat:3 }}%</span>
         <span class="text-xs text-gray-500">(360 días)</span>
       </div>
       <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 flex flex-col items-center shadow">
-        <span class="text-xs text-yellow-700 font-semibold mb-1">TCEA Emisor c/Escudo</span>
+        <span class="text-xs text-yellow-700 font-semibold mb-1 flex items-center">
+          TCEA Emisor c/Escudo
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-64">
+              TCEA del emisor considerando el ahorro fiscal (escudo fiscal) generado por los intereses.
+            </div>
+          </div>
+        </span>
         <span class="text-2xl font-extrabold text-yellow-700">{{ bond.tcea_emisor_escudo|mul:100|floatformat:3 }}%</span>
         <span class="text-xs text-gray-500">(360 días)</span>
       </div>
       <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 flex flex-col items-center shadow">
-        <span class="text-xs text-yellow-700 font-semibold mb-1">TREA Bonista</span>
+        <span class="text-xs text-yellow-700 font-semibold mb-1 flex items-center">
+          TREA Bonista
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-64">
+              Tasa de Rendimiento Efectivo Anual para el bonista. Refleja el rendimiento real de la inversión.
+            </div>
+          </div>
+        </span>
         <span class="text-2xl font-extrabold text-yellow-700">{{ bond.trea_bonista|mul:100|floatformat:3 }}%</span>
         <span class="text-xs text-gray-500">(360 días)</span>
       </div>
@@ -68,52 +141,140 @@
       <div id="ratios-content" class="hidden mt-2 bg-white/90 border border-yellow-200 rounded-xl p-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <span class="text-xs text-gray-500">Duración</span>
+            <span class="text-xs text-gray-500 flex items-center">
+              Duración
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Medida de la sensibilidad del precio del bono a cambios en las tasas de interés (en años).
+                </div>
+              </div>
+            </span>
             <span class="block text-lg font-bold text-yellow-700">{{ bond.duracion|floatformat:2 }}</span>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Convexidad</span>
+            <span class="text-xs text-gray-500 flex items-center">
+              Convexidad
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Medida de la curvatura de la relación entre el precio del bono y los rendimientos.
+                </div>
+              </div>
+            </span>
             <span class="block text-lg font-bold text-yellow-700">{{ bond.convexidad|floatformat:2 }}</span>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Total</span>
+            <span class="text-xs text-gray-500 flex items-center">
+              Total
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Suma de los valores presentes de los flujos de caja ponderados por el tiempo.
+                </div>
+              </div>
+            </span>
             <span class="block text-lg font-bold text-yellow-700">{{ bond.total|floatformat:2 }}</span>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Duración Modificada</span>
+            <span class="text-xs text-gray-500 flex items-center">
+              Duración Modificada
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Variación porcentual del precio del bono ante un cambio de 1% en el rendimiento.
+                </div>
+              </div>
+            </span>
             <span class="block text-lg font-bold text-yellow-700">{{ bond.duracion_modificada|floatformat:2 }}</span>
           </div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-600">
           <div>
-            <span class="block font-semibold text-blue-700">Días capitalización</span>
+            <span class="font-semibold text-blue-700 flex items-center">
+              Días capitalización
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Número de días en el período de capitalización de la tasa de interés.
+                </div>
+              </div>
+            </span>
             <span>{{ bond.capitalization_days }}</span>
           </div>
           <div>
-            <span class="block font-semibold text-blue-700">Nº Total de Periodos</span>
+            <span class="font-semibold text-blue-700 flex items-center">
+              Nº Total de Periodos
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Número total de períodos de pago de cupones durante la vida del bono.
+                </div>
+              </div>
+            </span>
             <span>{{ bond.total_periods }}</span>
           </div>
           <div>
-            <span class="block font-semibold text-blue-700">Costes Iniciales Emisor</span>
+            <span class="font-semibold text-blue-700 flex items-center">
+              Costes Iniciales Emisor
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Costos totales incurridos por el emisor al momento de la emisión del bono.
+                </div>
+              </div>
+            </span>
             <span>S/ {{ bond.issuer_initial_cost|floatformat:2 }}</span>
           </div>
           <div>
-            <span class="block font-semibold text-blue-700">Costes Iniciales Bonista</span>
+            <span class="font-semibold text-blue-700 flex items-center">
+              Costes Iniciales Bonista
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Costos totales incurridos por el bonista al momento de la compra del bono.
+                </div>
+              </div>
+            </span>
             <span>S/ {{ bond.bondholder_initial_cost|floatformat:2 }}</span>
           </div>
         </div>
         <div class="flex flex-wrap gap-4 mt-4 items-center">
           <div class="flex flex-col items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-            <span class="text-xs text-blue-700 font-semibold">COK Semestral</span>
-            <span class="text-lg font-bold text-blue-700">{{ bond.cok|mul:100 }}%</span>
+            <span class="text-xs text-blue-700 font-semibold flex items-center">
+              COK
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Costo de Oportunidad del Capital. Tasa de descuento utilizada para calcular el valor presente de los flujos del bono.
+                </div>
+              </div>
+            </span>
+            <span class="text-lg font-bold text-blue-700">{{ bond.cok|mul:100|floatformat:3 }}%</span>
           </div>
           <div class="flex flex-col items-center px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <span class="text-xs text-yellow-700 font-semibold">Tasa efectiva anual</span>
-            <span class="text-base font-bold text-yellow-700">{{ bond.effective_annual_rate|mul:100 }}%</span>
+            <span class="text-xs text-yellow-700 font-semibold flex items-center">
+              Tasa efectiva anual
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Tasa de interés anual que tiene en cuenta la capitalización.
+                </div>
+              </div>
+            </span>
+            <span class="text-base font-bold text-yellow-700">{{ bond.effective_annual_rate|mul:100|floatformat:3 }}%</span>
           </div>
           <div class="flex flex-col items-center px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <span class="text-xs text-yellow-700 font-semibold">Tasa efectiva {{ bond.get_coupon_frequency_display }}</span>
-            <span class="text-base font-bold text-yellow-700">{{ bond.effective_coupon_rate|mul:100 }}%</span>
+            <span class="text-xs text-yellow-700 font-semibold flex items-center">
+              Tasa efectiva {{ bond.get_coupon_frequency_display }}
+              <div class="tooltip-container">
+                <span class="tooltip-icon">i</span>
+                <div class="tooltip-text w-64">
+                  Tasa de interés efectiva para el período del cupón.
+                </div>
+              </div>
+            </span>
+            <span class="text-base font-bold text-yellow-700">{{ bond.effective_coupon_rate|mul:100|floatformat:3 }}%</span>
           </div>
         </div>
       </div>

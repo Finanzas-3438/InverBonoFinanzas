@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+{% load bond_extras %}
+{% block title %}Editor de Bonos en Tiempo Real{% endblock %}
+
+{% block content %}
+{% include "_sidebar.html" %}
+
+<main class="ml-56 min-h-screen p-8 bg-gradient-to-br from-yellow-100 via-white to-yellow-100">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center gap-6 mb-2">
+      <h2 class="text-4xl font-extrabold text-yellow-700">Editor de Bonos en Tiempo Real</h2>
+    </div>
+    <h3 class="text-xl font-light mt-2 mb-4 text-yellow-600">Modifica los datos y obtén los resultados de tu bono al instante.</h3>
+
+    <div class="grid grid-cols-2 gap-8">
+      <form id="bond-editor-form" class="flex flex-col items-start">
+        <section class="w-full flex flex-col gap-3 bg-white/90 rounded-2xl shadow-xl border border-yellow-200 p-8">
+          <div>
+            <h2 class="text-2xl font-semibold text-yellow-700 mb-4">Ingresa los datos del bono:</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <fieldset class="flex flex-col gap-1 w-full">
+                <label for="nominal_value" class="bond-label flex items-center">Valor Nominal
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Valor facial del bono, utilizado como base para calcular los pagos de intereses.
+                    </div>
+                  </div>
+                </label>
+                <input id="display_nominal_value" data-as-currency="true" class="bond-input" type="text" inputmode="decimal" placeholder="0,000.00" required>
+                <input type="hidden" name="nominal_value" id="nominal_value">
+              </fieldset>
+              <fieldset class="flex flex-col gap-1 w-full">
+                <label for="commercial_value" class="bond-label flex items-center">Valor Comercial
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Precio al que el bono se compra o vende en el mercado.
+                    </div>
+                  </div>
+                </label>
+                <input id="display_commercial_value" data-as-currency="true" class="bond-input" type="text" inputmode="decimal" placeholder="0,000.00" required>
+                <input type="hidden" name="commercial_value" id="commercial_value">
+              </fieldset>
+              <fieldset class="flex flex-col gap-1 w-full">
+                <label for="issue_date" class="bond-label flex items-center">Fecha de emisión
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Fecha en la que el bono es emitido.
+                    </div>
+                  </div>
+                </label>
+                <input id="issue_date" name="issue_date" class="bond-input" type="date" required>
+              </fieldset>
+              <fieldset class="flex flex-col gap-1 w-full min-w-0">
+                <label for="years_number" class="bond-label flex items-center">N° de años
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      El número de años hasta que el bono madure.
+                    </div>
+                  </div>
+                </label>
+                <input id="years_number" name="years_number" class="bond-input" type="number" required>
+              </fieldset>
+            </div>
+          </div>
+          <div class="flex gap-4 items-center">
+            <fieldset class="flex flex-col gap-1 w-full">
+              <label for="coupon_frequency" class="bond-label flex items-center">Frecuencia del cupón
+                <div class="tooltip-container">
+                  <span class="tooltip-icon">i</span>
+                  <div class="tooltip-text w-48">
+                    Frecuencia con la que se pagan los cupones del bono.
+                  </div>
+                </div>
+              </label>
+              <select id="coupon_frequency" name="coupon_frequency" class="bond-input">
+                <option value="diaria">Diaria</option>
+                <option value="semanal">Semanal</option>
+                <option value="quincenal">Quincenal</option>
+                <option value="mensual">Mensual</option>
+                <option value="bimestral">Bimestral</option>
+                <option value="trimestral">Trimestral</option>
+                <option value="cuatrimestral">Cuatrimestral</option>
+                <option value="semestral">Semestral</option>
+                <option value="anual">Anual</option>
+              </select>
+            </fieldset>
+            <fieldset class="flex flex-col gap-1 w-full">
+              <label class="bond-label flex items-center">Tipo de tasa de interés
+                <div class="tooltip-container">
+                  <span class="tooltip-icon">i</span>
+                  <div class="tooltip-text w-48">
+                    Indica si la tasa es nominal o efectiva.
+                  </div>
+                </div>
+              </label>
+              <div class="mt-1 flex rounded-md shadow-sm">
+                <div class="relative flex items-stretch flex-grow focus-within:z-10">
+                  <input type="radio" name="interest_rate_type" id="effective_rate" value="efectiva" class="sr-only peer/efectiva" checked>
+                  <label for="effective_rate" class="cursor-pointer rounded-l-md w-full py-1.5 text-sm font-medium text-gray-700 border border-gray-600 peer-checked/efectiva:bg-yellow-500 peer-checked/efectiva:text-white hover:bg-gray-200 bg-white text-center transition-colors duration-150 ease-in-out">Efectiva</label>
+                </div>
+                <div class="relative flex items-stretch flex-grow focus-within:z-10 -ml-px">
+                  <input type="radio" name="interest_rate_type" id="nominal_rate" value="nominal" class="sr-only peer/nominal">
+                  <label for="nominal_rate" class="cursor-pointer rounded-r-md w-full py-1.5 text-sm font-medium text-gray-700 border border-gray-600 peer-checked/nominal:bg-yellow-500 peer-checked/nominal:text-white hover:bg-gray-200 bg-white text-center transition-colors duration-150 ease-in-out">Nominal</label>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset class="flex flex-col gap-1 w-full">
+              <label for="capitalization" class="bond-label flex items-center">Capitalización
+                <div class="tooltip-container">
+                  <span class="tooltip-icon">i</span>
+                  <div class="tooltip-text w-48">
+                    Frecuencia con la que los intereses se capitalizan.
+                  </div>
+                </div>
+              </label>
+              <select id="capitalization" name="capitalization" class="bond-input">
+                <option value="diaria">Diaria</option>
+                <option value="semanal">Semanal</option>
+                <option value="quincenal">Quincenal</option>
+                <option value="mensual">Mensual</option>
+                <option value="bimestral">Bimestral</option>
+                <option value="trimestral">Trimestral</option>
+                <option value="cuatrimestral">Cuatrimestral</option>
+                <option value="semestral">Semestral</option>
+                <option value="anual">Anual</option>
+              </select>
+            </fieldset>
+          </div>
+          <div class="flex gap-4 items-center">
+            <fieldset class="flex flex-col gap-1 w-full">
+              <label for="interest_rate" class="bond-label flex items-center">Tasa de interés
+                <div class="tooltip-container">
+                  <span class="tooltip-icon">i</span>
+                  <div class="tooltip-text w-48">
+                    Tasa de interés del bono.
+                  </div>
+                </div>
+              </label>
+              <div class="relative">
+                <input id="interest_rate" name="interest_rate" class="bond-input w-full pr-7" type="number" step="any" placeholder="0.00" required>
+                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
+              </div>
+            </fieldset>
+            <fieldset class="flex flex-col gap-1 w-full">
+              <label for="annual_discount_rate" class="bond-label flex items-center truncate">Tasa anual de descuento
+                <div class="tooltip-container">
+                  <span class="tooltip-icon">i</span>
+                  <div class="tooltip-text w-48">
+                    Tasa de descuento para calcular el valor presente de los flujos de efectivo futuros.
+                  </div>
+                </div>
+              </label>
+              <div class="relative">
+                <input id="annual_discount_rate" name="annual_discount_rate" class="bond-input w-full pr-7" type="number" step="any" placeholder="0.00" required>
+                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
+              </div>
+            </fieldset>
+            <fieldset class="flex flex-col gap-1 w-full">
+              <label for="income_tax" class="bond-label flex items-center">Imp. a la Renta
+                <div class="tooltip-container">
+                  <span class="tooltip-icon">i</span>
+                  <div class="tooltip-text w-48">
+                    Impuesto a la renta que se aplica a los ingresos por intereses.
+                  </div>
+                </div>
+              </label>
+              <div class="relative">
+                <input id="income_tax" name="income_tax" class="bond-input w-full pr-7" type="number" step="any" placeholder="0.00" required>
+                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">%</span>
+              </div>
+            </fieldset>
+          </div>
+          <div class="mt-3">
+            <h2 class="text-lg font-semibold text-yellow-700">Gastos iniciales</h2>
+            <div class="flex flex-col gap-3 mt-2 p-4 bg-yellow-50/30 border border-gray-200 rounded-xl w-fit">
+              <fieldset class="flex items-center gap-6">
+                <label for="premium_percentage" class="bond-label w-28 flex items-center">% Prima
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Porcentaje del valor nominal que se paga como prima.
+                    </div>
+                  </div>
+                </label>
+                <input id="premium_percentage" name="premium_percentage" class="bg-gray-50 rounded-md border-gray-600 border py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950" type="number" step="0.01" min="0" max="100" placeholder="0.00 %" inputmode="decimal">
+              </fieldset>
+              <fieldset class="flex items-center gap-2">
+                <label for="structuring_percentage" class="bond-label w-32 flex items-center truncate">% Estructuración
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Costos de estructuración como porcentaje del valor nominal.
+                    </div>
+                  </div>
+                </label>
+                <div class="flex items-center">
+                  <input id="structuring_percentage" name="structuring_percentage" class="bg-gray-50 rounded-l-md border-gray-600 border border-r-0 py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950" type="number" step="0.01" min="0" max="100" placeholder="0.00 %" inputmode="decimal">
+                  <select id="structuring_type" name="structuring_type" class="bg-gray-50 rounded-r-md border-gray-600 border py-[4.5px] px-2 placeholder:italic outline-yellow-600 text-yellow-950">
+                    <option value="emisor" selected> Emisor </option>
+                    <option value="bonista"> Bonista </option>
+                    <option value="ambos"> Ambos </option>
+                  </select>
+                </div>
+              </fieldset>
+              <fieldset class="flex items-center gap-6">
+                <label for="placement_percentage" class="bond-label w-28 flex items-center">% Colocación
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Costos de colocación como porcentaje del valor nominal.
+                    </div>
+                  </div>
+                </label>
+                <div class="flex items-center">
+                  <input id="placement_percentage" name="placement_percentage" class="bg-gray-50 rounded-l-md border-gray-600 border border-r-0 py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950" type="number" step="0.01" min="0" max="100" placeholder="0.00 %" inputmode="decimal">
+                  <select id="placement_type" name="placement_type" class="bg-gray-50 rounded-r-md border-gray-600 border py-[4.5px] px-2 placeholder:italic outline-yellow-600 text-yellow-950">
+                    <option value="emisor" selected> Emisor </option>
+                    <option value="bonista"> Bonista </option>
+                    <option value="ambos"> Ambos </option>
+                  </select>
+                </div>
+              </fieldset>
+              <fieldset class="flex items-center gap-6">
+                <label for="float_percentage" class="bond-label w-28 flex items-center">% Flotación
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Costos de flotación como porcentaje del valor nominal.
+                    </div>
+                  </div>
+                </label>
+                <div class="flex items-center">
+                  <input id="float_percentage" name="float_percentage" class="bg-gray-50 rounded-l-md border-gray-600 border border-r-0 py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950" type="number" step="0.01" min="0" max="100" placeholder="0.00 %" inputmode="decimal">
+                  <select id="float_type" name="float_type" class="bg-gray-50 rounded-r-md border-gray-600 border py-[4.5px] px-2 placeholder:italic outline-yellow-600 text-yellow-950">
+                    <option value="emisor" selected> Emisor </option>
+                    <option value="bonista"> Bonista </option>
+                    <option value="ambos"> Ambos </option>
+                  </select>
+                </div>
+              </fieldset>
+              <fieldset class="flex items-center gap-6">
+                <label for="cavali_percentage" class="bond-label w-28 flex items-center">% CAVALI
+                  <div class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <div class="tooltip-text w-48">
+                      Costos de CAVALI como porcentaje del valor nominal.
+                    </div>
+                  </div>
+                </label>
+                <div class="flex items-center">
+                  <input id="cavali_percentage" name="cavali_percentage" class="bg-gray-50 rounded-l-md border-gray-600 border border-r-0 py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950" type="number" step="0.01" min="0" max="100" placeholder="0.00 %" inputmode="decimal">
+                  <select id="cavali_type" name="cavali_type" class="bg-gray-50 rounded-r-md border-gray-600 border py-[4.5px] px-2 placeholder:italic outline-yellow-600 text-yellow-950">
+                    <option value="emisor" selected> Emisor </option>
+                    <option value="bonista"> Bonista </option>
+                    <option value="ambos"> Ambos </option>
+                  </select>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <div id="results-container" class="bg-white rounded-2xl shadow-xl border border-yellow-200 p-8 sticky top-8 h-fit">
+        <h2 class="text-2xl font-semibold text-yellow-700 mb-4">Resultados en Tiempo Real</h2>
+        <div id="results-placeholder" class="text-center text-gray-500 py-16">
+          <p>Los resultados aparecerán aquí una vez que completes el formulario.</p>
+        </div>
+        <div id="results-content" class="hidden">
+          <!-- Results will be injected here -->
+        </div>
+        <div id="loading-spinner" class="hidden text-center py-16">
+            <svg class="animate-spin h-12 w-12 text-yellow-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <p class="mt-4 text-yellow-700 font-semibold">Calculando...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('bond-editor-form');
+    const resultsContainer = document.getElementById('results-content');
+    const placeholder = document.getElementById('results-placeholder');
+    const spinner = document.getElementById('loading-spinner');
+
+    // Currency formatting script from create-bond.html
+    const currencyInputs = document.querySelectorAll('input[data-as-currency="true"]');
+    currencyInputs.forEach(displayInput => {
+      const hiddenInput = document.getElementById(displayInput.id.replace('display_', ''));
+      displayInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/[^\d.]/g, '');
+        const parts = value.split('.');
+        const integerPart = parts[0];
+        const decimalPart = parts.length > 1 ? '.' + parts[1].slice(0, 2) : '';
+        const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        e.target.value = formattedInteger + decimalPart;
+        hiddenInput.value = value.replace(/,/g, '');
+        debouncedCalculate();
+      });
+      displayInput.addEventListener('blur', function(e) {
+        let value = e.target.value.replace(/[^\d.]/g, '');
+        if (value === '' || value === '.') {
+          e.target.value = '';
+          hiddenInput.value = '';
+          return;
+        }
+        const parts = value.split('.');
+        let integerPart = parts[0];
+        let decimalPart = parts.length > 1 ? parts[1].slice(0, 2) : '';
+        if (integerPart === '') integerPart = '0';
+        if (decimalPart.length === 1) decimalPart += '0';
+        if (decimalPart.length === 0) decimalPart = '00';
+        const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        e.target.value = formattedInteger + '.' + decimalPart;
+        hiddenInput.value = integerPart + '.' + decimalPart; 
+        debouncedCalculate();
+      });
+    });
+
+    let debounceTimer;
+    function debouncedCalculate() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(calculateBond, 500);
+    }
+
+    form.addEventListener('input', function(event) {
+        if (event.target.type !== 'text' && event.target.type !== 'hidden') {
+             debouncedCalculate();
+        }
+    });
+
+    async function calculateBond() {
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Basic validation
+        const requiredFields = ['nominal_value', 'commercial_value', 'issue_date', 'years_number', 'coupon_frequency', 'interest_rate_type', 'capitalization', 'interest_rate', 'annual_discount_rate', 'income_tax'];
+        for (const field of requiredFields) {
+            if (!data[field]) {
+                placeholder.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+                spinner.classList.add('hidden');
+                placeholder.innerHTML = '<p>Por favor, complete todos los campos requeridos para ver los resultados.</p>';
+                return;
+            }
+        }
+
+        placeholder.classList.add('hidden');
+        resultsContainer.classList.add('hidden');
+        spinner.classList.remove('hidden');
+
+        try {
+            const response = await fetch('{% url "bonds:calculate_bond" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error en el servidor');
+            }
+
+            const results = await response.json();
+            displayResults(results);
+
+        } catch (error) {
+            displayError(error.message);
+        } finally {
+            spinner.classList.add('hidden');
+        }
+    }
+
+    function displayResults(results) {
+        resultsContainer.innerHTML = `
+            <dl class="space-y-4">
+                <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
+                    <dt class="font-semibold text-yellow-800">Precio Actual</dt>
+                    <dd class="text-right font-mono text-yellow-900">S/ ${results.precio_actual}</dd>
+                </div>
+                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                    <dt class="font-medium text-gray-600">Costos Iniciales Emisor</dt>
+                    <dd class="text-right font-mono text-gray-800">S/ ${results.issuer_initial_cost}</dd>
+                </div>
+                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                    <dt class="font-medium text-gray-600">Costos Iniciales Bonista</dt>
+                    <dd class="text-right font-mono text-gray-800">S/ ${results.bondholder_initial_cost}</dd>
+                </div>
+                <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
+                    <dt class="font-semibold text-yellow-800">TCEA Emisor</dt>
+                    <dd class="text-right font-mono text-yellow-900">${results.tcea_emisor}</dd>
+                </div>
+                 <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
+                    <dt class="font-semibold text-yellow-800">TCEA Emisor con Escudo</dt>
+                    <dd class="text-right font-mono text-yellow-900">${results.tcea_emisor_escudo}</dd>
+                </div>
+                <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
+                    <dt class="font-semibold text-yellow-800">TREA Bonista</dt>
+                    <dd class="text-right font-mono text-yellow-900">${results.trea_bonista}</dd>
+                </div>
+                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                    <dt class="font-medium text-gray-600">Duración</dt>
+                    <dd class="text-right font-mono text-gray-800">${results.duracion}</dd>
+                </div>
+                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                    <dt class="font-medium text-gray-600">Convexidad</dt>
+                    <dd class="text-right font-mono text-gray-800">${results.convexidad}</dd>
+                 </div>
+                 <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                    <dt class="font-medium text-gray-600">Total</dt>
+                    <dd class="text-right font-mono text-gray-800">${results.total}</dd>
+                 </div>
+                 <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                    <dt class="font-medium text-gray-600">Duración Modificada</dt>
+                    <dd class="text-right font-mono text-gray-800">${results.duracion_modificada}</dd>
+                </div>
+            </dl>
+        `;
+        resultsContainer.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+    }
+
+    function displayError(errorMessage) {
+        resultsContainer.innerHTML = `<div class="text-red-600 bg-red-100 border border-red-400 rounded-lg p-4"><strong>Error:</strong> ${errorMessage}</div>`;
+        resultsContainer.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+    }
+});
+</script>
+{% endblock %}

@@ -26,10 +26,22 @@
             </tr>
           </thead>
           <tbody>
-            
-            <tr>
-              <td class="py-2 px-4 text-gray-500 italic" colspan="5">No tienes bonos registrados aún.</td>
+            {% for bond in bonds %}
+            <tr class="hover:bg-gray-50 border-b border-gray-200">
+              <td class="py-3 px-4 text-gray-700">{{ forloop.counter }}</td>
+              <td class="py-3 px-4 text-gray-700">{{ bond.created_at|date:"d/m/Y" }}</td>
+              <td class="py-3 px-4 font-medium text-gray-800">{{ bond.name }}</td>
+              <td class="py-3 px-4 text-gray-700">S/ {{ bond.nominal_value|floatformat:2 }}</td>
+              <td class="py-3 px-4 text-gray-700">{{ bond.interest_rate|floatformat:2 }}%</td>
+              <td class="py-3 px-4">
+                <a href="{% url 'bonds:detail' bond.id %}" class="text-yellow-600 hover:text-yellow-800 hover:underline transition">Ver detalle</a>
+              </td>
             </tr>
+            {% empty %}
+            <tr>
+              <td class="py-4 px-4 text-gray-500 italic text-center" colspan="6">No tienes bonos registrados aún.</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
