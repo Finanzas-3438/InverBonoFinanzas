@@ -28,7 +28,7 @@ input[type="number"] {
     @apply flex items-center justify-center size-3 border border-yellow-700 rounded-full text-[8px] font-medium font-mono text-yellow-700 cursor-help;
   }
   .tooltip-text {
-    @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 transition-opacity duration-300 invisible z-10;
+    @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 transition-opacity duration-300 invisible z-50;
   }
   .tooltip-container:hover .tooltip-text {
     @apply visible opacity-100;

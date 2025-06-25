@@ -134,17 +134,18 @@
               Tasa de Rendimiento Efectivo Anual para el bonista. Refleja el rendimiento real de la inversión.
             </div>
           </div>
-        </span>
-        <span class="text-2xl font-extrabold text-yellow-700">{{ bond.trea_bonista|mul:100|floatformat:3 }}%</span>
+        </span>        <span class="text-2xl font-extrabold text-yellow-700">{{ bond.trea_bonista|mul:100|floatformat:3 }}%</span>
         <span class="text-xs text-gray-500">(360 días)</span>
       </div>
     </div>
+
+    <!-- Detalles -->
     <div class="mb-8">
-      <button id="ratios-toggle" type="button" class="w-full flex items-center justify-between px-4 py-3 bg-yellow-200 hover:bg-yellow-300 rounded-xl font-bold text-yellow-800 shadow transition">
-        Más detalles
-        <svg id="ratios-arrow" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      <button id="details-toggle" type="button" class="w-full flex items-center justify-between px-4 py-3 bg-yellow-200 hover:bg-yellow-300 rounded-xl font-bold text-yellow-800 shadow transition">
+        Detalles
+        <svg id="details-arrow" class="w-5 h-5 transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
       </button>
-      <div id="ratios-content" class="hidden mt-2 bg-white/90 border border-yellow-200 rounded-xl p-4">
+      <div id="details-content" class="mt-2 bg-white/90 border border-yellow-200 rounded-xl p-4 transition-all duration-500 ease-in-out opacity-100">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
             <span class="text-xs text-gray-500 flex items-center">
@@ -279,23 +280,263 @@
                   Tasa de interés efectiva para el período del cupón.
                 </div>
               </div>
-            </span>
-            <span class="text-base font-bold text-yellow-700">{{ bond.effective_coupon_rate|mul:100|floatformat:3 }}%</span>
+            </span>            <span class="text-base font-bold text-yellow-700">{{ bond.effective_coupon_rate|mul:100|floatformat:3 }}%</span>
           </div>
         </div>
-      </div>
-      <script>
+      </div>      <script>
         document.addEventListener('DOMContentLoaded', function() {
-          const btn = document.getElementById('ratios-toggle');
-          const content = document.getElementById('ratios-content');
-          const arrow = document.getElementById('ratios-arrow');
+          const btn = document.getElementById('details-toggle');
+          const content = document.getElementById('details-content');
+          const arrow = document.getElementById('details-arrow');
+          
+          let isOpen = true; // estado inicial: abierto
+          
           btn.addEventListener('click', function() {
-            content.classList.toggle('hidden');
-            arrow.classList.toggle('rotate-180');
+            if (isOpen) {
+              // Colapsar
+              content.style.maxHeight = '0px';
+              content.style.paddingTop = '0px';
+              content.style.paddingBottom = '0px';
+              content.style.marginTop = '0px';
+              content.style.opacity = '0';
+              arrow.classList.remove('rotate-180');
+              isOpen = false;
+            } else {
+              // Expandir
+              content.style.paddingTop = '1rem';
+              content.style.paddingBottom = '1rem';
+              content.style.marginTop = '0.5rem';
+              content.style.opacity = '1';
+              
+              // usar una altura generosa que cubra todo el contenido
+              content.style.maxHeight = '600px';
+              arrow.classList.add('rotate-180');
+              isOpen = true;
+            }
           });
+          
+          // Inicializar como desplegado con altura suficiente
+          content.style.maxHeight = '600px';
+          content.style.opacity = '1';
         });
       </script>
     </div>
+
+    <!-- Nuevo: Análisis ATM y Gráfico de Convexidad -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Análisis ATM -->
+      <div class="bg-white/90 border border-yellow-200 rounded-xl p-6">
+        <h3 class="text-lg font-bold text-yellow-700 mb-4 flex items-center">
+          Análisis de Posición del Bono (ATM)
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-64">
+              Análisis que determina si el bono cotiza a la par, sobre la par o bajo la par en relación a su valor nominal.
+            </div>
+          </div>
+        </h3>
+        <div id="atm-analysis" class="space-y-3">
+          <!-- analisis atm aca generado con js -->
+        </div>
+      </div>
+
+      <!-- Gráfico de Convexidad -->
+      <div class="bg-white/90 border border-yellow-200 rounded-xl p-6">
+        <h3 class="text-lg font-bold text-yellow-700 mb-4 flex items-center">
+          Curva Precio-Rendimiento
+          <div class="tooltip-container">
+            <span class="tooltip-icon">i</span>
+            <div class="tooltip-text w-64">
+              Gráfico que muestra cómo cambia el precio del bono ante variaciones en la tasa de interés. La curvatura representa la convexidad.
+            </div>
+          </div>
+        </h3>
+        <canvas id="convexityChart" width="400" height="300"></canvas>      </div>
+    </div>
   </div>
 </main>
+<script>        
+  document.addEventListener('DOMContentLoaded', function() {
+    // Datos del bono para JavaScript
+    const bondData = {
+      nominalValue: {{ bond.nominal_value }},
+      commercialValue: {{ bond.commercial_value }},
+      currentPrice: {{ bond.precio_actual }},
+      interestRate: {{ bond.interest_rate }},
+      annualDiscountRate: {{ bond.annual_discount_rate }},
+      yearsNumber: {{ bond.years_number }},
+      couponFrequency: '{{ bond.coupon_frequency }}',
+      periodsPerYear: {{ bond.periods_per_year }},
+      totalPeriods: {{ bond.total_periods }},
+      duration: {{ bond.duracion }},
+      convexity: {{ bond.convexidad }}
+    };
+
+    // Análisis ATM
+    function calculateATMAnalysis() {
+      const nominalValue = bondData.nominalValue;
+      const currentPrice = bondData.currentPrice;
+      const commercialValue = bondData.commercialValue;
+      
+      const priceVsNominal = (currentPrice / nominalValue) * 100;
+      const priceVsCommercial = (currentPrice / commercialValue) * 100;
+      
+      let atmStatus = '';
+      let atmColor = '';
+      let atmDescription = '';
+      
+      if (Math.abs(priceVsNominal - 100) < 1) {
+        atmStatus = 'A LA PAR (AT THE MONEY)';
+        atmColor = 'text-blue-700 bg-blue-50 border-blue-200';
+        atmDescription = 'El bono cotiza aproximadamente igual a su valor nominal.';
+      } else if (priceVsNominal > 100) {
+        atmStatus = 'SOBRE LA PAR (ABOVE PAR)';
+        atmColor = 'text-green-700 bg-green-50 border-green-200';
+        atmDescription = 'El bono cotiza por encima de su valor nominal, indicando una prima.';
+      } else {
+        atmStatus = 'BAJO LA PAR (BELOW PAR)';
+        atmColor = 'text-red-700 bg-red-50 border-red-200';
+        atmDescription = 'El bono cotiza por debajo de su valor nominal, indicando un descuento.';
+      }
+
+      return `
+        <div class="border-2 ${atmColor} rounded-lg p-4">
+          <div class="font-bold text-sm mb-2">${atmStatus}</div>
+          <div class="text-xs mb-3">${atmDescription}</div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="font-semibold">vs. Nominal:</span>
+              <span class="font-mono">${priceVsNominal.toFixed(2)}%</span>
+            </div>
+            <div>
+              <span class="font-semibold">vs. Comercial:</span>
+              <span class="font-mono">${priceVsCommercial.toFixed(2)}%</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-xs text-gray-600 mt-2">
+          <div><strong>Precio Actual:</strong> S/ ${currentPrice.toFixed(2)}</div>
+          <div><strong>Valor Nominal:</strong> S/ ${nominalValue.toFixed(2)}</div>
+          <div><strong>Valor Comercial:</strong> S/ ${commercialValue.toFixed(2)}</div>
+        </div>
+      `;
+    }
+
+    // Gráfico de Convexidad
+    function drawConvexityChart() {
+      const canvas = document.getElementById('convexityChart');
+      const ctx = canvas.getContext('2d');
+      
+      // configuración del gráfico
+      const width = canvas.width;
+      const height = canvas.height;
+      const padding = 40;
+      const graphWidth = width - 2 * padding;
+      const graphHeight = height - 2 * padding;
+      
+      // limpiar canvas
+      ctx.clearRect(0, 0, width, height);
+      
+      // datos para el gráfico
+      const baseRate = bondData.interestRate / 100;
+      const rateChanges = [-0.05, -0.04, -0.03, -0.02, -0.01, 0, 0.01, 0.02, 0.03, 0.04, 0.05];
+      const prices = [];
+      
+      // calcular precios aproximados
+      rateChanges.forEach(deltaRate => {
+        // Fórmula: P ≈ P0 * [1 - D*Δy + (1/2)*C*(Δy)²]
+        const duration = bondData.duration;
+        const convexity = bondData.convexity;
+        const currentPrice = bondData.currentPrice;
+        
+        const priceChange = -duration * deltaRate + 0.5 * convexity * deltaRate * deltaRate;
+        const newPrice = currentPrice * (1 + priceChange);
+        prices.push(newPrice);
+      });
+      
+      // encontrar valores min y max para escalar
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      const minRate = Math.min(...rateChanges);
+      const maxRate = Math.max(...rateChanges);
+      
+      // función para convertir coordenadas
+      function scaleX(rate) {
+        return padding + ((rate - minRate) / (maxRate - minRate)) * graphWidth;
+      }
+      
+      function scaleY(price) {
+        return height - padding - ((price - minPrice) / (maxPrice - minPrice)) * graphHeight;
+      }
+      
+      // draw
+      ctx.strokeStyle = '#374151';
+      ctx.lineWidth = 1;
+      
+      // X
+      ctx.beginPath();
+      ctx.moveTo(padding, height - padding);
+      ctx.lineTo(width - padding, height - padding);
+      ctx.stroke();
+      
+      // Y
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, height - padding);
+      ctx.stroke();
+      
+      // draw canvas
+      ctx.strokeStyle = '#EAB308';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      for (let i = 0; i < rateChanges.length; i++) {
+        const x = scaleX(rateChanges[i]);
+        const y = scaleY(prices[i]);
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+      
+      // punto actual
+      const currentIndex = rateChanges.indexOf(0);
+      if (currentIndex !== -1) {
+        ctx.fillStyle = '#DC2626';
+        ctx.beginPath();
+        ctx.arc(scaleX(0), scaleY(prices[currentIndex]), 5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      
+      // tags
+      ctx.fillStyle = '#374151';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      
+      // tag X
+      ctx.fillText('Cambio en Tasa (%)', width / 2, height - 10);
+      
+      // tag Y
+      ctx.save();
+      ctx.translate(15, height / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('Precio del Bono (S/)', 0, 0);
+      ctx.restore();
+      
+      ctx.font = '8px sans-serif';
+      rateChanges.forEach((rate, index) => {
+        if (index % 2 === 0) {
+          ctx.fillText((rate * 100).toFixed(1) + '%', scaleX(rate), height - padding + 15);
+        }
+      });
+    }
+
+    // ejecutar análisis y gráfico
+    document.getElementById('atm-analysis').innerHTML = calculateATMAnalysis();
+    drawConvexityChart();
+  });
+</script>
 {% endblock %}
