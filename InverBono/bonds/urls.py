@@ -10,4 +10,5 @@ urlpatterns = [
     path('calculate_bond/', views.calculate_bond_view, name='calculate_bond'),
     path('<int:pk>/', views.bond_detail, name='detail'),
     path('delete/<int:pk>/', views.delete_bond_view, name='delete_bond'),
+    path('download/<int:bond_id>/', views.download_bond_excel, name='download_bond_excel'),
 ]
