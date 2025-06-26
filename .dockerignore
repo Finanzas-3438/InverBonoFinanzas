@@ -1,0 +1,11 @@
+# .dockerignore
+.git
+.gitignore
+.env
+__pycache__/
+*.pyc
+env/
+data/
+dev.db
+Bono_ejemplo.xlsm
+Bono_example.csv

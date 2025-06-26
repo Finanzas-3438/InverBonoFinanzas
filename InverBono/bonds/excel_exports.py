@@ -369,5 +369,9 @@ def generate_bond_excel(bond_id):
     workbook.save(buffer)
     buffer.seek(0)
     response = HttpResponse(buffer.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=bono_{bond.name.replace(' ', '_')}.xlsx'
+
+    # excel name
+    clean_bond_name = bond.name.replace(' ', '_')
+    filename = f"bono_{clean_bond_name}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
     return response
