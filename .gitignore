@@ -5,6 +5,6 @@ dist
 package-lock.json
 package.json
 *__pycache__*
-pyvenv.cfg
+env/pyvenv.cfg
 Bono_ejemplo.xlsm
 Bono_example.csv
