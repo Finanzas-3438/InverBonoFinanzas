@@ -22,7 +22,7 @@ SECRET_KEY = '2fm4@2f06j%r(-c*ehk69rqfy*(dhk@-^x#r@2qw8rm%ootg4i'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['inverbono.azurewebsites.net', 'localhost', '127.0.0.1']
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -106,6 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CSRF_TRUSTED_ORIGINS = ['https://inverbono.azurewebsites.net'] 
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
