@@ -45,7 +45,7 @@ def signup_view(request):
 
 @login_required
 def dashboard_view(request):
-    bonds = Bond.objects.all()
+    bonds = Bond.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'accounts/dashboard.html', {'bonds': bonds})
 
 def logout_view(request):
