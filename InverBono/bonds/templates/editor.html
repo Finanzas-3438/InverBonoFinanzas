@@ -146,7 +146,7 @@
               </div>
             </fieldset>
             <fieldset class="flex flex-col gap-1 w-full">
-              <label for="annual_discount_rate" class="bond-label flex items-center truncate">Tasa anual de descuento
+              <label for="annual_discount_rate" class="bond-label flex items-center"><span class="truncate">Tasa anual de descuento</span>
                 <div class="tooltip-container">
                   <span class="tooltip-icon">i</span>
                   <div class="tooltip-text w-48">
@@ -175,7 +175,7 @@
             </fieldset>
           </div>
           <div class="mt-3">
-            <h2 class="text-lg font-semibold text-yellow-700">Gastos adicionales</h2>
+            <h2 class="text-lg font-semibold text-yellow-700">Gastos Iniciales</h2>
             <div class="flex flex-col gap-3 mt-2 p-4 bg-yellow-50/30 border border-gray-200 rounded-xl w-fit">
               <fieldset class="flex items-center gap-6">
                 <label for="premium_percentage" class="bond-label w-28 flex items-center">% Prima
@@ -189,7 +189,7 @@
                 <input id="premium_percentage" name="premium_percentage" class="bg-gray-50 rounded-md border-gray-600 border py-1 px-2 placeholder:italic outline-yellow-600 text-yellow-950" type="number" step="0.01" min="0" max="100" placeholder="0.00 %" inputmode="decimal">
               </fieldset>
               <fieldset class="flex items-center gap-2">
-                <label for="structuring_percentage" class="bond-label w-32 flex items-center truncate">% Estructuración
+                <label for="structuring_percentage" class="bond-label w-32 flex items-center"><span class="truncate">% Estructuración</span>
                   <div class="tooltip-container">
                     <span class="tooltip-icon">i</span>
                     <div class="tooltip-text w-48">
@@ -265,13 +265,24 @@
         </section>
       </form>
 
-      <div id="results-container" class="bg-white rounded-2xl shadow-xl border border-yellow-200 p-8 sticky top-8 h-fit">
+      <div id="results-container" class="bg-white rounded-2xl shadow-xl border border-yellow-200 p-6 sticky top-8 h-fit max-h-[calc(100vh-2rem)] overflow-y-auto">
         <h2 class="text-2xl font-semibold text-yellow-700 mb-4">Resultados en Tiempo Real</h2>
         <div id="results-placeholder" class="text-center text-gray-500 py-16">
-          <p>Los resultados aparecerán aquí una vez que completes el formulario.</p>
+          <div class="mb-4">
+            <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-600 mb-2">Resultados en Tiempo Real</h3>
+          <p class="text-sm">Complete el formulario y vea los resultados instantáneamente</p>
+          <div class="mt-4 text-xs text-gray-400">
+            💡 Los cálculos se actualizan automáticamente conforme ingresa los datos
+          </div>
         </div>
         <div id="results-content" class="hidden">
-          <!-- Results will be injected here -->
+          <!-- 
+          AQUI ESTAN LOS RESULTADOS
+          -->
         </div>
         <div id="loading-spinner" class="hidden text-center py-16">
             <svg class="animate-spin h-12 w-12 text-yellow-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -349,7 +360,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 placeholder.classList.remove('hidden');
                 resultsContainer.classList.add('hidden');
                 spinner.classList.add('hidden');
-                placeholder.innerHTML = '<p>Por favor, complete todos los campos requeridos para ver los resultados.</p>';
+                placeholder.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="mb-4">
+                            <svg class="w-12 h-12 mx-auto text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-yellow-600 mb-2">Datos Incompletos</h3>
+                        <p class="text-sm text-yellow-700">Complete todos los campos requeridos para ver los resultados</p>
+                        <div class="mt-4 text-xs text-yellow-500">
+                            ⚠️ Verifique que todos los campos marcados como requeridos estén completos
+                        </div>
+                    </div>
+                `;
                 return;
             }
         }
@@ -384,56 +408,152 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function displayResults(results) {
+        const utilidad = parseFloat(results.utilidad.replace(/,/g, '')) || 0;
+        const isProfit = utilidad > 0;
+        const utilidadClass = isProfit ? 'bg-green-500' : 'bg-red-500';
+        const utilidadText = isProfit ? 'Utilidad' : 'Pérdida';
+        
         resultsContainer.innerHTML = `
-            <dl class="space-y-4">
-                <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
-                    <dt class="font-semibold text-yellow-800">Precio Actual</dt>
-                    <dd class="text-right font-mono text-yellow-900">S/ ${results.precio_actual}</dd>
+            <!-- Resumen Principal -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl border-2 border-yellow-300">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-yellow-800">📊 Resumen Principal</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-yellow-700">Precio Actual</span>
+                        <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full font-bold">S/ ${results.precio_actual}</span>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                    <dt class="font-medium text-gray-600">Costos Iniciales Emisor</dt>
-                    <dd class="text-right font-mono text-gray-800">S/ ${results.issuer_initial_cost}</dd>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-yellow-700">${utilidadText} para el Bonista:</span>
+                    <span class="px-4 py-2 ${utilidadClass} text-white rounded-full font-bold text-lg">
+                        ${isProfit ? '+' : ''}S/ ${results.utilidad}
+                    </span>
                 </div>
-                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                    <dt class="font-medium text-gray-600">Costos Iniciales Bonista</dt>
-                    <dd class="text-right font-mono text-gray-800">S/ ${results.bondholder_initial_cost}</dd>
+            </div>
+
+            <!-- Tasas Principales -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-yellow-800 mb-3">📈 Tasas de Rendimiento</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 text-center shadow-lg">
+                        <div class="text-xs text-yellow-700 font-semibold mb-1">TCEA Emisor</div>
+                        <div class="text-2xl font-bold text-yellow-700">${results.tcea_emisor}</div>
+                        <div class="text-xs text-gray-500">Costo efectivo anual</div>
+                    </div>
+                    <div class="bg-green-50 border-2 border-green-400 rounded-xl p-4 text-center shadow-lg">
+                        <div class="text-xs text-green-700 font-semibold mb-1">TCEA c/Escudo</div>
+                        <div class="text-2xl font-bold text-green-700">${results.tcea_emisor_escudo}</div>
+                        <div class="text-xs text-gray-500">Con ahorro fiscal</div>
+                    </div>
+                    <div class="bg-blue-50 border-2 border-blue-400 rounded-xl p-4 text-center shadow-lg">
+                        <div class="text-xs text-blue-700 font-semibold mb-1">TREA Bonista</div>
+                        <div class="text-2xl font-bold text-blue-700">${results.trea_bonista}</div>
+                        <div class="text-xs text-gray-500">Rendimiento efectivo</div>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
-                    <dt class="font-semibold text-yellow-800">TCEA Emisor</dt>
-                    <dd class="text-right font-mono text-yellow-900">${results.tcea_emisor}</dd>
+            </div>
+
+            <!-- Costos Iniciales -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-yellow-800 mb-3">💰 Costos Iniciales</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-semibold text-red-700">Costos del Emisor</div>
+                                <div class="text-xs text-red-600">Gastos por emisión</div>
+                            </div>
+                            <div class="text-xl font-bold text-red-700">S/ ${results.issuer_initial_cost}</div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-semibold text-blue-700">Costos del Bonista</div>
+                                <div class="text-xs text-blue-600">Gastos por compra</div>
+                            </div>
+                            <div class="text-xl font-bold text-blue-700">S/ ${results.bondholder_initial_cost}</div>
+                        </div>
+                    </div>
                 </div>
-                 <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
-                    <dt class="font-semibold text-yellow-800">TCEA Emisor con Escudo</dt>
-                    <dd class="text-right font-mono text-yellow-900">${results.tcea_emisor_escudo}</dd>
+            </div>
+
+            <!-- Métricas de Riesgo -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-yellow-800 mb-3">⚖️ Métricas de Riesgo</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+                        <div class="text-xs text-gray-600 mb-1">Duración</div>
+                        <div class="text-lg font-bold text-gray-800">${results.duracion}</div>
+                        <div class="text-xs text-gray-500">años</div>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+                        <div class="text-xs text-gray-600 mb-1">Convexidad</div>
+                        <div class="text-lg font-bold text-gray-800">${results.convexidad}</div>
+                        <div class="text-xs text-gray-500">curvatura</div>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+                        <div class="text-xs text-gray-600 mb-1">Dur. Modificada</div>
+                        <div class="text-lg font-bold text-gray-800">${results.duracion_modificada}</div>
+                        <div class="text-xs text-gray-500">sensibilidad</div>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow">
+                        <div class="text-xs text-gray-600 mb-1">Total</div>
+                        <div class="text-lg font-bold text-gray-800">${results.total}</div>
+                        <div class="text-xs text-gray-500">VP ponderado</div>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 p-3 bg-yellow-50 rounded-lg">
-                    <dt class="font-semibold text-yellow-800">TREA Bonista</dt>
-                    <dd class="text-right font-mono text-yellow-900">${results.trea_bonista}</dd>
+            </div>
+
+            <!-- Información Técnica -->
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-yellow-800 mb-3">🔧 Información Técnica</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">COK (Costo de Oportunidad):</span>
+                            <span class="font-bold text-gray-800">${results.cok}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total de Períodos:</span>
+                            <span class="font-bold text-gray-800">${results.total_periods}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                    <dt class="font-medium text-gray-600">Duración</dt>
-                    <dd class="text-right font-mono text-gray-800">${results.duracion}</dd>
-                </div>
-                <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                    <dt class="font-medium text-gray-600">Convexidad</dt>
-                    <dd class="text-right font-mono text-gray-800">${results.convexidad}</dd>
-                 </div>
-                 <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                    <dt class="font-medium text-gray-600">Total</dt>
-                    <dd class="text-right font-mono text-gray-800">${results.total}</dd>
-                 </div>
-                 <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                    <dt class="font-medium text-gray-600">Duración Modificada</dt>
-                    <dd class="text-right font-mono text-gray-800">${results.duracion_modificada}</dd>
-                </div>
-            </dl>
+            </div>
+
+            <!-- Interpretación -->
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                <h4 class="font-bold text-blue-800 mb-2">💡 Interpretación</h4>
+                <p class="text-sm text-blue-700">
+                    ${isProfit ? 
+                        `✅ <strong>Inversión Rentable:</strong> El bono genera una utilidad de S/ ${results.utilidad}, lo que indica que es una inversión favorable al precio actual.` :
+                        `⚠️ <strong>Inversión con Pérdida:</strong> El bono genera una pérdida de S/ ${results.utilidad.replace('-', '')}, sugiriendo reconsiderar la inversión al precio actual.`
+                    }
+                </p>
+            </div>
         `;
         resultsContainer.classList.remove('hidden');
         placeholder.classList.add('hidden');
     }
 
     function displayError(errorMessage) {
-        resultsContainer.innerHTML = `<div class="text-red-600 bg-red-100 border border-red-400 rounded-lg p-4"><strong>Error:</strong> ${errorMessage}</div>`;
+        resultsContainer.innerHTML = `
+            <div class="text-center py-8">
+                <div class="text-red-600 bg-red-100 border border-red-400 rounded-lg p-6">
+                    <div class="flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <strong class="text-lg">Error en el Cálculo</strong>
+                    </div>
+                    <p class="text-sm">${errorMessage}</p>
+                    <div class="mt-4 text-xs text-red-500">
+                        Verifique que todos los datos ingresados sean correctos y vuelva a intentarlo.
+                    </div>
+                </div>
+            </div>
+        `;
         resultsContainer.classList.remove('hidden');
         placeholder.classList.add('hidden');
     }

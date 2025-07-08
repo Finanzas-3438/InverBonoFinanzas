@@ -11,8 +11,9 @@ from io import BytesIO
 import openpyxl
 from .excel_exports import generate_bond_excel
 
+@login_required
 def bond_detail(request, pk):
-    bond = get_object_or_404(Bond, pk=pk)
+    bond = get_object_or_404(Bond, pk=pk, user=request.user)
     return render(request, 'bonds/detail.html', {'bond': bond})
 
 def bond_editor(request):
@@ -32,7 +33,7 @@ def calculate_bond_view(request):
                     return Decimal(default)
 
             bond_data = {
-                'name': data.get('name', 'Bono Temporal'),
+                'name': data.get('name', 'Bono Temporal') if data.get('name', '').strip() else 'Bono Temporal',
                 'nominal_value': parse_decimal(data.get('nominal_value'), 0),
                 'commercial_value': parse_decimal(data.get('commercial_value'), 0),
                 'issue_date': data.get('issue_date'),
@@ -99,6 +100,7 @@ def truncate_decimal(value, max_digits, decimal_places):
         d = Decimal((sign, tuple(digits), exp))
     return d
 
+@login_required
 def create_bond_view(request):
     error_message = None
     if request.method == 'POST':
@@ -110,8 +112,17 @@ def create_bond_view(request):
             except (InvalidOperation, TypeError, ValueError):
                 return Decimal(default)
 
+        def get_bond_name():
+            provided_name = request.POST.get('name', '').strip()
+            if provided_name:
+                return provided_name
+            
+            user_bond_count = Bond.objects.filter(user=request.user).count()
+            return f'Bono #{user_bond_count + 1}'
+
         bond_data = {
-            'name': request.POST.get('name', 'Bono #1'),
+            'user': request.user,  
+            'name': get_bond_name(),
             'nominal_value': parse_decimal(request.POST.get('nominal_value'), 0),
             'commercial_value': parse_decimal(request.POST.get('commercial_value'), 0),
             'issue_date': request.POST.get('issue_date'),
@@ -173,22 +184,26 @@ def create_bond_view(request):
             error_message = f'Ocurrió un error inesperado al registrar el bono: {e}'
     return render(request, 'create-bond.html', {'error_message': error_message})
 
+@login_required
 def list_bonds_view(request):
     try:
-        bonds = list(Bond.objects.all().order_by('-issue_date'))
+        bonds = list(Bond.objects.filter(user=request.user).order_by('-created_at'))
         db_error = False
     except Exception:
         bonds = []
         db_error = True
     return render(request, 'list.html', {'bonds': bonds, 'db_error': db_error})
 
+@login_required
 def delete_bond_view(request, pk):
-    bond = get_object_or_404(Bond, pk=pk)
+    bond = get_object_or_404(Bond, pk=pk, user=request.user)
     if request.method == 'POST':
         bond.delete()
     return redirect('bonds:list_bonds')
 
 @login_required
 def download_bond_excel(request, bond_id):
+    # Verificar que el usuario sea el propietario del bono
+    bond = get_object_or_404(Bond, id=bond_id, user=request.user)
     return generate_bond_excel(bond_id)
 

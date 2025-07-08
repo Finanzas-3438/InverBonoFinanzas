@@ -1,5 +1,7 @@
 
-# Crear entorno virtual para desarrollo
+# InverBono Setup
+
+## Crear entorno virtual para desarrollo
 
 ` python -m venv env `
 ` source env/bin/activate `
@@ -7,23 +9,23 @@
 ` pip install django `
 ` pip freeze > requirements.txt `
 
-# Instalar dependencias
+## Instalar dependencias
 
 ` pip install -r requirements.txt `
 
-# Hacer una migracion
+## Hacer una migracion
 
 ` python manage.py makemigrations `
 ` python manage.py migrate `
 
-# Correr el proyecto
+## Correr el proyecto
 
 ` python manage.py runserver `
 
-# Correr tests
+## Correr tests
 
 ` python InverBono\manage.py test bonds `
 
-# Correr tailwind
+## Correr tailwind
 
 ` npx tailwindcss -i ./InverBono/static/css/input.css -o ./InverBono/static/css/output.css --watch `

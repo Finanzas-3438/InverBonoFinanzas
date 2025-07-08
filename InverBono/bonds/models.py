@@ -1,13 +1,18 @@
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
 from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ValidationError
 
 class Bond(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bonds', null=True, blank=True)
     name = models.CharField(max_length=100, default="Bono #1")
     nominal_value = models.DecimalField(max_digits=20, decimal_places=2)
     commercial_value = models.DecimalField(max_digits=20, decimal_places=2)
     issue_date = models.DateField()
     years_number = models.DecimalField(max_digits=4, decimal_places=2)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
     coupon_frequency = models.CharField(max_length=20, choices=[
         ('diaria', 'Diaria'),
         ('semanal', 'Semanal'),
